@@ -1,0 +1,62 @@
+# IDE-specific files
+.vscode/
+.idea/
+
+# Python-specific files
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environment
+env/
+venv/
+ENV/
+
+# Packaging
+*.egg-info/
+dist/
+build/
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# Environment variables file
+.env
+
+# Docker and builds
+*.tar.gz
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Byte-compiled / optimized / DLL files
+*.pyc
+
+# Unit test / coverage reports
+.coverage
+
+# Sphinx documentation
+docs/_build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# macOS
+*.DS_Store
+
+# Windows
+Thumbs.db
+
+# Distribution / packaging
+.Python
+env/
+pip-log.txt
+pytest_cache/
+tox/
+
+# Other
+node_modules/
+coverage/
+.cache/
