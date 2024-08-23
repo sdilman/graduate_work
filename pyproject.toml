@@ -81,7 +81,7 @@ skip-magic-trailing-comma = true
 plugins = [
   "pydantic.mypy"
 ]
-exclude = [".*/migrations/.*", ".*/alembic/.*", ".*/tests/.*", "docs", "venv", ".venv"]
+exclude = [".*/migrations/.*", ".*/tests/.*", "docs", "venv", ".venv"]
 
 # https://mypy.readthedocs.io/en/latest/config_file.html#using-a-pyproject-toml-file
 pretty = true

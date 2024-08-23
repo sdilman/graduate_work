@@ -41,5 +41,6 @@ setup_precommit:
 		$$PIP_CMD install pre-commit pydantic mypy ruff; \
 		pre-commit install; \
 	else \
-		$$PIP_CMD install --upgrade pre-commit tox pydantic mypy ruff; \
+		$$PIP_CMD install --upgrade pre-commit pydantic mypy ruff; \
+		pre-commit install; \
 	fi
