@@ -1,7 +1,7 @@
 # How to run application and tests
 
 ```bash
-# setup pre-commit for local environment
+# ❗ setup pre-commit for local environment
 make setup_precommit
 ```
 
