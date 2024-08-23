@@ -38,7 +38,7 @@ setup_precommit:
 	fi; \
 	$$PIP_CMD install --upgrade pip; \
 	if [ -z "$$(command -v pre-commit)" ]; then \
-		$$PIP_CMD install pre-commit tox pydantic mypy ruff; \
+		$$PIP_CMD install pre-commit pydantic mypy ruff; \
 		pre-commit install; \
 	else \
 		$$PIP_CMD install --upgrade pre-commit tox pydantic mypy ruff; \
