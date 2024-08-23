@@ -1,0 +1,85 @@
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+ignore = ["ANN101","ANN102", "ANN204", "D100", "D101", "D102", "D103","D104", "D107", "D203", "D212", "COM812"]
+select = [
+    "A",    # flake8-builtins (Avoid shadowing Python built-ins)
+    "ANN",  # flake8-annotations (Enforce type annotations)
+    "B",    # flake8-bugbear (Find likely bugs and design problems)
+    "C4",   # flake8-comprehensions (Optimize list comprehensions)
+    "C90",  # flake8-mccabe (Cyclomatic complexity)
+    "D",    # pydocstyle (PEP 257 conventions for docstrings)
+    "E",    # pycodestyle (PEP 8 style guide enforcement)
+    "EM",   # flake8-errmsg (Enforce error messages in docstrings)
+    "ERA",  # eradicate (Detect commented-out code)
+    "F",    # pyflakes (Detect undefined names, unused imports, etc.)
+    "I",    # isort (Ensure correct ordering of imports)
+    "N",    # pep8-naming (Enforce PEP 8 naming conventions)
+    "Q",    # flake8-quotes (Ensure consistent use of quotes)
+    "S",    # flake8-bandit (Security checks for common security issues)
+    "T10",  # flake8-debugger (Checks for the presence of debugger calls and imports)
+    "T20",  # flake8-print (Enforce consistent use of print statements)
+    "W",    # pycodestyle (Warning codes for PEP 8 style issues)
+    "COM",  # flake8-commas (Enforce trailing commas)
+    "DTZ",  # flake8-datetimez (Ensure correct use of timezone-aware datetimes)
+    "RUF",  # Ruff-specific rules
+    "TID",  # flake8-tidy-imports (Manage imports effectively)
+    "UP",   # pyupgrade (Upgrade to modern Python syntax)
+    "SLOT", # flake8-slots (Enforce PEP 526 __slots__)
+    "SIM",  # flake8-simplify (Simplify complex expressions)
+    "PERF", # flake8-performance (Optimize performance)
+    "PLE",   # pylint errors
+]
+
+extend-ignore = ["B904", "S311", "S104"]
+exclude = [
+     "**/migrations/**",
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+     "**/alembic/**",]
+fixable = ["I", "RUF100"]
+unfixable = []
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.mypy]
+plugins = [
+  "pydantic.mypy"
+]
+exclude = [".*/migrations/.*", ".*/alembic/.*", "tests", "docs", "venv", ".venv"]
+follow_imports = "silent"
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_generics = true
+check_untyped_defs = true
+no_implicit_reexport = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+ignore_missing_imports = true
+
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
