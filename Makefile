@@ -29,7 +29,7 @@ clean: down
 	- docker system prune -af --volumes || true
 	- docker volume ls -q | xargs -r docker volume rm || true
 
-.PHONY: setup_precommitc
+.PHONY: setup_precommit
 setup_precommit:
 	@if [ -z "$$(command -v pip3)" ]; then \
 		PIP_CMD="pip3"; \
