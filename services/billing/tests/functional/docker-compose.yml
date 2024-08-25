@@ -1,0 +1,8 @@
+services:
+
+  tests_billing_app_backend:
+    build:
+      context: ../../
+      dockerfile: tests/functional/Dockerfile
+    env_file:
+      - .env
