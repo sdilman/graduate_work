@@ -1,26 +1,26 @@
 .PHONY: env
 env:
-	@cp deploy-app/.env.example deploy-app/.env
-	@cp deploy-test-functional/.env.example deploy-test-functional/.env
-	@cp deploy-test-integration/.env.example deploy-test-integration/.env
+	@cp services/billing/.env.example services/billing/.env
+	@cp services/billing/tests/functional/.env.example services/billing/tests/functional/.env
+	@cp services/billing/tests/integration/.env.example services/billing/tests/integration/.env
 
 .PHONY: up_service
 up_service: env
-	@docker compose -f deploy-app/docker-compose.yml up --build
+	@docker compose -f services/billing/docker-compose.yml up --build
 
 .PHONY: up_test_f
 up_test_f: env
-	@docker compose -f deploy-test-functional/docker-compose.yml up --build
+	@docker services/billing/tests/functional/docker-compose.yml up --build
 
 .PHONY: up_test_i
 up_test_i: env
-	@docker compose -f deploy-test-integration/docker-compose.yml up --build
+	@docker compose -f services/billing/tests/integration/docker-compose.yml up --build
 
 .PHONY: down
 down:
-	- docker compose -f deploy-app/docker-compose.yml down -v
-	- docker compose -f deploy-test-functional/docker-compose.yml down -v
-	- docker compose -f deploy-test-functional/docker-compose.yml down -v
+	- docker compose -f services/billing/docker-compose.yml down -v || true
+	- docker compose -f services/billing/tests/functional/docker-compose.yml down -v  || true
+	- docker compose -f services/billing/tests/integration/docker-compose.yml down -v  || true
 
 .PHONY: clean
 clean: down
@@ -28,19 +28,8 @@ clean: down
 	- docker ps -a -q | xargs -r docker rm || true
 	- docker system prune -af --volumes || true
 	- docker volume ls -q | xargs -r docker volume rm || true
+	- docker images -q | xargs -r docker rmi || true
 
 .PHONY: setup_precommit
 setup_precommit:
-	@if [ -z "$$(command -v pip3)" ]; then \
-		PIP_CMD="pip3"; \
-	else \
-		PIP_CMD="pip"; \
-	fi; \
-	$$PIP_CMD install --upgrade pip; \
-	if [ -z "$$(command -v pre-commit)" ]; then \
-		$$PIP_CMD install pre-commit pydantic mypy ruff; \
-		pre-commit install; \
-	else \
-		$$PIP_CMD install --upgrade pre-commit pydantic mypy ruff; \
-		pre-commit install; \
-	fi
+	@pre-commit install
