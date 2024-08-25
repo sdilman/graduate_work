@@ -1,0 +1,84 @@
+@startuml
+
+
+entity User {
+  * sso_id
+  --
+  * email
+  * created_at
+  * updated_at
+}
+
+entity Transaction {
+  * id
+  --
+  * order_id
+  * type: [payment, refund]
+  * status: [pending, succeeded, canceled]
+  * amount
+  * currency
+  * created_at
+  * updated_at
+}
+
+entity Product {
+  * id
+  --
+  * title
+  * description
+  * basic_price
+  * basic_currency
+  * created_at
+  * updated_at
+}
+
+entity OrderProduct {
+  * id
+  * order_id
+  * product_id
+  --
+}
+
+entity UserProduct {
+  * id
+  * product_id
+  * user_id
+  --
+  * active_from: not null for subscriptions
+  * active_till: not null for subscriptions
+  * renewal_enabled: [false, true]
+  * created_at
+  * updated_at
+}
+
+entity Order {
+  * id
+  --
+  * status: [pending, paid, refunding, refunded]
+  * total_amount
+  * currency
+  * created_at
+  * updated_at
+}
+
+entity PaymentMethod {
+  * id
+  * user_id
+  --
+  * payment_token
+  * payment_method
+  * description
+  * is_active: true, false
+  * created_at
+  * updated_at
+}
+
+Transaction }|..|| Order
+UserProduct }|..|| User
+UserProduct }|..|| Product
+OrderProduct }|..|| Product
+OrderProduct }|..|| Order
+PaymentMethod }|..|| User
+
+
+@enduml

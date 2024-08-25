@@ -1,0 +1,77 @@
+@startuml
+
+box External
+actor "Frontend" as frontend
+participant "Auth API" as auth
+participant "Payment Gateway (Юkassa)" as payment
+box end
+
+box Billing Service
+participant "Billing API" as billing
+database "Database" as db
+database "Redis cache" as cache
+queue "Kafka" as kafka
+box end
+
+group /create_order
+frontend -> billing++: Create order
+billing -> auth++: Strict token validation
+auth --> billing: HTTP 403
+billing --> frontend: HTTP 403
+auth --> billing--: OK
+billing -> db: Save order in db
+billing --> frontend: order_id
+end
+
+group /get_payment_link/{order_id}
+frontend -> billing: Request
+billing -> cache: Check link in cache
+cache --> billing: return link
+billing --> frontend: return /link to payment
+billing -> payment++: Create payment
+payment --> billing--: get payment object
+billing -> db: Save transaction object with pending status
+billing -> frontend--: return /link to payment
+end
+
+group /cancel_subscription_renewal/{subscription_id}
+frontend -> billing++: Request
+billing -> auth++: Strict token validation
+auth --> billing: HTTP 403
+billing --> frontend: HTTP 403
+auth --> billing--: OK
+billing -> db: change subscription renewal status.
+billing --> frontend--: OK
+end
+
+group /create_refund/{order_id} # only for admins
+frontend -> billing++: Request
+billing -> auth++: Strict token validation
+auth --> billing: HTTP 403
+billing --> frontend: HTTP 403
+auth --> billing--: OK
+billing -> db: create refund transaction in db with pending status
+billing -> payment: request to create refund
+billing --> frontend--: OK
+end
+
+group /results_callback_url
+payment -> billing: Send results
+billing -> kafka: write event
+end
+
+group results_worker
+kafka -> db: Read results of transaction
+db -> db: Save payment method token for auto renewal if success and enabled
+db -> db: update transaction status
+db -> db: create/update gods in db per user from order
+end
+
+group subscription_renewal_worker
+db -> db: Find users with subscriptions for renewal
+db -> db: Create orders for them (if not already exists)
+loop while retry_count < max_retry_count; retry every n days
+db -> payment: Try to pay using payment token
+end
+end
+@enduml
