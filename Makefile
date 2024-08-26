@@ -1,3 +1,5 @@
+ACTIVATE=.venv/bin/activate
+
 .PHONY: env
 env:
 	@cp services/billing/.env.example services/billing/.env
@@ -30,6 +32,19 @@ clean: down
 	- docker volume ls -q | xargs -r docker volume rm || true
 	- docker images -q | xargs -r docker rmi || true
 
-.PHONY: setup_precommit
-setup_precommit:
+
+.PHONY: sync
+sync:
+	@curl -LsSf https://astral.sh/uv/install.sh | sh
+	@uv sync --frozen
+
+.PHONY: activate
+activate:
+	@SHELL_PATH=$$($$SHELL -c 'echo $$SHELL') && . .venv/bin/activate && exec $$SHELL_PATH
+
+.PHONY: pre-commit
+pre-commit:
 	@pre-commit install
+
+.PHONY: setup
+setup: sync activate pre-commit
