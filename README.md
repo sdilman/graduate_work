@@ -1,22 +1,26 @@
 # How to run application and tests
 
 ```bash
-# Install uv
-curl -LsSf https://astral.sh/uv/install.sh | sh
-# Sync packages to local environment
-uv sync --frozen
-# ❗ setup pre-commit for local environment
-make setup_precommit
-# To install dependencies
+# Sync project dependencies
+make setup
+```
+
+```bash
+# https://docs.astral.sh/uv/reference/cli/
+# ❗ Example: How to add package to project for de
+uv add 'package_name_example' --dev
+# ❗ Example: How to manage dependencies for particular service
 cd services/billing
-# For app
-uv add 'package'
-# For tests common
-uv add 'package' --optional test
-# For tests functional
-uv add 'package' --optional test-functional
-# For tests integration
-uv add 'package' --optional test-integration
+# For core
+uv add 'package_name_example'
+# For optional tests common
+uv add 'package_name_example' --optional test
+# For optional tests functional
+uv add 'package_name_example' --optional test-functional
+# For optional tests integration
+uv add 'package_name_example' --optional test-integration
+# For removing package
+uv remove 'package_name_example' '--optional test | test-functional | test-integration'
 ```
 
 See Makefile for commands
