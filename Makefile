@@ -10,7 +10,7 @@ up_service: env
 
 .PHONY: up_test_f
 up_test_f: env
-	@docker services/billing/tests/functional/docker-compose.yml up --build
+	@docker compose -f services/billing/tests/functional/docker-compose.yml up --build
 
 .PHONY: up_test_i
 up_test_i: env
