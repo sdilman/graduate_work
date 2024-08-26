@@ -1,0 +1,12 @@
+services:
+
+  billing_app_backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    expose:
+      - ${APP_PORT}
