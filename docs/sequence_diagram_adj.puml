@@ -52,16 +52,17 @@ end
 end
 
 group /cancel_subscription_renewal/{subscription_id}
-frontend -> billing++: Request
-billing -> logging: Log request details (mask sensitive data)
+frontend -> billing++: Request to cancel auto-renewal / subscription renewal
+billing -> logging: Log cancellation request (mask sensitive data)
 billing -> auth++: Strict token validation
 auth --> billing: HTTP 403
 billing -> logging: Log auth failure (mask sensitive data)
 billing --> frontend: HTTP 403
 auth --> billing--: OK
-billing -> db: change subscription renewal status (encrypted)
+billing -> db: Update subscription status to not renew (encrypted)
 billing -> logging: Log subscription status change (mask sensitive data)
-billing --> frontend--: OK
+billing -> notification: Send cancellation confirmation (email/push)
+billing --> frontend--: OK, auto-renewal cancelled
 end
 
 group /create_refund/{order_id} # only for admins
@@ -85,18 +86,13 @@ billing -> kafka: write event (encrypted)
 billing -> monitoring: Monitor result processing time
 end
 
-group results_worker
-kafka -> db: Read results of transaction (decrypt)
-db -> logging: Log result processing (mask sensitive data)
-db -> db: Save payment method token for auto renewal if success and enabled (encrypted)
-db -> db: update transaction status (encrypted)
-db -> db: create/update goods in db per user from order (encrypted)
-db -> logging: Log update completion (mask sensitive data)
-end
-
 group subscription_renewal_worker
 db -> db: Find users with subscriptions for renewal (encrypted)
-db -> db: Create orders for them (if not already exists) (encrypted)
+alt Subscriptions found
+    db -> notification: Send renewal reminder (email/push)
+    db -> logging: Log reminder sent (mask sensitive data)
+end
+db -> db: Create orders for renewal if not already exists (encrypted)
 db -> logging: Log order creation for renewal (mask sensitive data)
 loop while retry_count < max_retry_count; retry every n days
     db -> payment: Try to pay using payment token (over HTTPS)
@@ -110,24 +106,6 @@ loop while retry_count < max_retry_count; retry every n days
         db -> notification: Send failed renewal notification (email/push)
     end
 end
-end
-
-group Auto-renewal Notification
-db -> db: Check subscriptions for renewal in 7 days (encrypted)
-alt Subscriptions found
-    db -> notification: Send renewal reminder (email/push)
-    db -> logging: Log reminder sent (mask sensitive data)
-end
-end
-
-group Cancel Auto-renewal Request
-frontend -> billing++: Request to cancel auto-renewal
-billing -> auth++: Strict token validation
-auth --> billing: OK
-billing -> db: Update subscription status to not renew (encrypted)
-billing -> logging: Log cancellation request (mask sensitive data)
-billing -> notification: Send cancellation confirmation (email/push)
-billing --> frontend--: OK, auto-renewal cancelled
 end
 
 group Error Handling
