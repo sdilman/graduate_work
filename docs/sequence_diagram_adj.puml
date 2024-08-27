@@ -3,8 +3,8 @@ box External
 actor "Frontend" as frontend
 participant "Auth API" as auth
 participant "Payment Gateway (Юkassa)" as payment
-participant "Email Service" as email
-participant "Push Notification Service" as push
+participant "Notification Service" as notification
+participant "Monitoring Service" as monitoring
 box end
 
 box Billing Service
@@ -13,7 +13,6 @@ database "Database" as db
 database "Redis cache" as cache
 queue "Kafka" as kafka
 participant "Logging Service" as logging
-participant "Monitoring Service" as monitoring
 participant "Encryption Service" as encryption
 box end
 
@@ -104,13 +103,11 @@ loop while retry_count < max_retry_count; retry every n days
     alt Payment success
         db -> db: Update renewal status (encrypted)
         db -> logging: Log successful renewal (mask sensitive data)
-        db -> email: Send confirmation email
-        db -> push: Send confirmation push notification
+        db -> notification: Send renewal confirmation (email/push)
     else Payment failure
         db -> logging: Log payment failure (mask sensitive data)
         db -> monitoring: Track failed renewal attempt
-        db -> email: Send failed renewal notification
-        db -> push: Send failed renewal push notification
+        db -> notification: Send failed renewal notification (email/push)
     end
 end
 end
@@ -118,8 +115,7 @@ end
 group Auto-renewal Notification
 db -> db: Check subscriptions for renewal in 7 days (encrypted)
 alt Subscriptions found
-    db -> email: Send renewal reminder email
-    db -> push: Send renewal reminder push notification
+    db -> notification: Send renewal reminder (email/push)
     db -> logging: Log reminder sent (mask sensitive data)
 end
 end
@@ -130,6 +126,7 @@ billing -> auth++: Strict token validation
 auth --> billing: OK
 billing -> db: Update subscription status to not renew (encrypted)
 billing -> logging: Log cancellation request (mask sensitive data)
+billing -> notification: Send cancellation confirmation (email/push)
 billing --> frontend--: OK, auto-renewal cancelled
 end
 
