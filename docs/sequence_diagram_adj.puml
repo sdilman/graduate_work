@@ -1,0 +1,115 @@
+@startuml
+box External
+actor "Frontend" as frontend
+participant "Auth API" as auth
+participant "Payment Gateway (Юkassa)" as payment
+participant "Notification Service" as notification
+participant "Monitoring Service" as monitoring
+box end
+
+box Billing Service
+participant "Billing API" as billing
+database "Database" as db
+database "Redis cache" as cache
+queue "Kafka" as kafka
+participant "Logging Service" as logging
+participant "Encryption Service" as encryption
+box end
+
+group /create_order
+frontend -> billing++: Create order
+billing -> logging: Log request details (mask sensitive data)
+billing -> auth++: Strict token validation
+auth --> billing: HTTP 403
+billing -> logging: Log auth failure (mask sensitive data)
+billing --> frontend: HTTP 403
+auth --> billing--: OK
+billing -> encryption: Encrypt order data
+billing -> db: Save order in db (encrypted)
+billing -> logging: Log order creation (mask sensitive data)
+billing --> frontend: order_id
+end
+
+group /get_payment_link/{order_id}
+frontend -> billing: Request
+billing -> logging: Log request details (mask sensitive data)
+billing -> cache: Check link in cache (encrypted)
+alt Cache hit
+    cache --> billing: return link (encrypted)
+    billing -> encryption: Decrypt link
+    billing -> logging: Log cache hit (mask sensitive data)
+    billing --> frontend: return /link to payment
+else Cache miss
+    billing -> payment++: Create payment (over HTTPS)
+    payment --> billing--: get payment object (encrypted)
+    billing -> encryption: Decrypt payment object
+    billing -> db: Save transaction object with pending status (encrypted)
+    billing -> cache: Save link to cache (encrypted)
+    billing -> logging: Log cache miss and payment creation (mask sensitive data)
+    billing -> monitoring: Track payment creation time
+    billing --> frontend--: return /link to payment
+end
+end
+
+group /cancel_subscription_renewal/{subscription_id}
+frontend -> billing++: Request to cancel auto-renewal / subscription renewal
+billing -> logging: Log cancellation request (mask sensitive data)
+billing -> auth++: Strict token validation
+auth --> billing: HTTP 403
+billing -> logging: Log auth failure (mask sensitive data)
+billing --> frontend: HTTP 403
+auth --> billing--: OK
+billing -> db: Update subscription status to not renew (encrypted)
+billing -> logging: Log subscription status change (mask sensitive data)
+billing -> notification: Send cancellation confirmation (email/push)
+billing --> frontend--: OK, auto-renewal cancelled
+end
+
+group /create_refund/{order_id} # only for admins
+frontend -> billing++: Request
+billing -> logging: Log refund request (mask sensitive data)
+billing -> auth++: Strict token validation
+auth --> billing: HTTP 403
+billing -> logging: Log auth failure (mask sensitive data)
+billing --> frontend: HTTP 403
+auth --> billing--: OK
+billing -> db: create refund transaction in db with pending status (encrypted)
+billing -> payment: request to create refund (over HTTPS)
+billing -> logging: Log refund creation (mask sensitive data)
+billing --> frontend--: OK
+end
+
+group /results_callback_url
+payment -> billing: Send results (over HTTPS)
+billing -> logging: Log results received (mask sensitive data)
+billing -> kafka: write event (encrypted)
+billing -> monitoring: Monitor result processing time
+end
+
+group subscription_renewal_worker
+db -> db: Find users with subscriptions for renewal (encrypted)
+alt Subscriptions found
+    db -> notification: Send renewal reminder (email/push)
+    db -> logging: Log reminder sent (mask sensitive data)
+end
+db -> db: Create orders for renewal if not already exists (encrypted)
+db -> logging: Log order creation for renewal (mask sensitive data)
+loop while retry_count < max_retry_count; retry every n days
+    db -> payment: Try to pay using payment token (over HTTPS)
+    alt Payment success
+        db -> db: Update renewal status (encrypted)
+        db -> logging: Log successful renewal (mask sensitive data)
+        db -> notification: Send renewal confirmation (email/push)
+    else Payment failure
+        db -> logging: Log payment failure (mask sensitive data)
+        db -> monitoring: Track failed renewal attempt
+        db -> notification: Send failed renewal notification (email/push)
+    end
+end
+end
+
+group Error Handling
+billing -> monitoring: Track errors and timeouts
+billing -> logging: Log error details (mask sensitive data)
+end
+@enduml
