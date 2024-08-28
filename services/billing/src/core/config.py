@@ -1,3 +1,5 @@
+import os
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -5,7 +7,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class DefaultSettings(BaseSettings):
     """Class to store default project settings."""
 
-    model_config = SettingsConfigDict(env_file="../.env", env_file_encoding="utf-8", extra="ignore")
+    env_file: str = "../.env"
+
+    if os.getenv("IS_TEST_FUNCTIONAL"):
+        env_file = "../tests/functional/.env"
+
+    model_config = SettingsConfigDict(env_file=env_file, env_file_encoding="utf-8", extra="ignore")
 
 
 class AppSettings(DefaultSettings):
@@ -25,9 +32,24 @@ class ApiSettings(DefaultSettings):
     model_config = SettingsConfigDict(env_prefix="API_")
 
 
+class PGSettings(DefaultSettings):
+    db: str = Field(...)
+    user: str = Field(...)
+    password: str = Field(...)
+    host: str = Field(...)
+    port: int = Field(...)
+    dsn: str = Field(...)
+    dsn_local: str = Field(...)
+    async_schema: str = Field(...)
+
+    model_config = SettingsConfigDict(env_prefix="PG_")
+
+
 class Settings:
+    debug: bool = False
     app: AppSettings = AppSettings()
     api: ApiSettings = ApiSettings()
+    pg: PGSettings = PGSettings()
 
 
 settings = Settings()

@@ -20,6 +20,7 @@ build/
 # Logs and databases
 *.log
 *.sqlite3
+services/billing/data
 
 # Environment variables file
 .env
