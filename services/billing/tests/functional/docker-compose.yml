@@ -7,7 +7,7 @@ services:
     env_file:
       - .env
 
-  tests_billing_app_postgres:
+  billing_app_postgres:
     image: postgres:15
     environment:
       POSTGRES_DB: ${PG_DB}

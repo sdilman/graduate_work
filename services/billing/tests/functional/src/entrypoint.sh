@@ -10,4 +10,6 @@ B_APP_PID=$!
 
 wait $B_APP_PID
 
+alembic upgrade head
+
 pytest
