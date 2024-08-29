@@ -71,13 +71,13 @@ jobs:
       # 4. Run Ruff Linter and show all errors
       - name: Run Ruff Linter
         run: |
-          ruff check --output-format=github --config=pyproject.toml .
+          ruff check --output-format=github --config=pyproject.toml ${{ steps.changed-files.outputs.all_changed_files }}
 
 
       # 5. Run Mypy Type Checking and show all errors
       - name: Run Mypy Type Checking
         run: |
-          mypy --config-file=pyproject.toml .
+          mypy --config-file=pyproject.toml ${{ steps.changed-files.outputs.all_changed_files }}
 
       # 6. Set Telegram notification message
       - name: Set Telegram Notification Message
