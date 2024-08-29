@@ -13,6 +13,8 @@ dev-dependencies = [
 
 [tool.ruff]
 line-length = 120
+force-exclude = true
+respect-gitignore = true
 
 [tool.ruff.lint]
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
@@ -31,13 +33,7 @@ ignore = [
   "EM102", # allow f-string literals for exceptions
 ]
 exclude = [
-    "alembic/**",
     "**/migrations/**",
-    ".git",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".venv",
-    "venv",
 ]
 unfixable = [
   "F", # pyflakes
