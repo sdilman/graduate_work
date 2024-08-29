@@ -33,7 +33,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.3.3 /uv /bin/uv
 COPY pyproject.toml .
 RUN uv pip install --system --no-cache-dir ".[test, test-integration]"
 
-ARG USERNAME=billing-tests-functional
+ARG USERNAME=billing-tests-integration
 ARG TESTS_DIR=/tests/integration
 
 # Copy application code

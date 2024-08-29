@@ -31,7 +31,8 @@ ignore = [
   "EM102", # allow f-string literals for exceptions
 ]
 exclude = [
-     "**/migrations/**",
+    "alembic/**",
+    "**/migrations/**",
     ".git",
     ".mypy_cache",
     ".ruff_cache",

@@ -10,3 +10,23 @@ services:
       - ${APP_PORT}:${APP_PORT}
     expose:
       - ${APP_PORT}
+
+  billing_app_postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${PG_DB}
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      PGPORT: ${PG_PORT}
+    expose:
+      - "${PG_PORT}"
+    ports:
+      - "${PG_PORT}:${PG_PORT}"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${PG_USER} -d ${PG_DB} -p ${PG_PORT}" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s

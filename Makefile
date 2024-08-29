@@ -40,7 +40,7 @@ sync:
 
 .PHONY: activate
 activate:
-	@SHELL_PATH=$$($$SHELL -c 'echo $$SHELL') && . .venv/bin/activate && exec $$SHELL_PATH
+	. .venv/bin/activate
 
 .PHONY: pre-commit
 pre-commit:
@@ -48,3 +48,9 @@ pre-commit:
 
 .PHONY: setup
 setup: sync activate pre-commit
+
+
+.PHONY: activate.bk
+activate.bk:
+	@SHELL_PATH=$$($$SHELL -c 'echo $$SHELL') && . .venv/bin/activate && exec $$SHELL_PATH
+	@SHELL_PATH=$$($$SHELL -c 'echo $$SHELL') && . .venv/bin/activate && exec $$SHELL_PATH
