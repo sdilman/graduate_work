@@ -30,13 +30,10 @@ ignore = [
   "EM101", # allow string literals for exceptions
   "EM102", # allow f-string literals for exceptions
 ]
+respect-gitignore = true
+force-exclude = true
 exclude = [
     "**/migrations/**",
-    ".git",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".venv",
-    "venv",
 ]
 unfixable = [
   "F", # pyflakes
@@ -100,6 +97,7 @@ exclude = [".*/migrations/.*", "docs", "venv", ".venv"]
 pretty = true
 show_traceback = true
 color_output = true
+enable_error_code = true
 
 strict = true
 allow_redefinition = false
