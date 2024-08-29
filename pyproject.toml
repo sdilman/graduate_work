@@ -97,7 +97,6 @@ exclude = [".*/migrations/.*", "docs", "venv", ".venv"]
 pretty = true
 show_traceback = true
 color_output = true
-enable_error_code = true
 
 strict = true
 allow_redefinition = false
