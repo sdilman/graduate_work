@@ -130,6 +130,6 @@ init_typed = true
 warn_required_dynamic_aliases = true
 
 
-#[[tool.mypy.overrides]]
-#module = ["*.auth.*"]
-#ignore_errors = true
+[[tool.mypy.overrides]]
+module = ["*.auth.*"]
+ignore_errors = true
