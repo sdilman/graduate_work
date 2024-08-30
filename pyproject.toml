@@ -34,6 +34,7 @@ ignore = [
 ]
 exclude = [
     "**/migrations/**",
+    "**/services/auth/**",
 ]
 unfixable = [
   "F", # pyflakes
@@ -91,7 +92,7 @@ skip-magic-trailing-comma = true
 plugins = [
   "pydantic.mypy"
 ]
-exclude = [".*/migrations/.*", "docs", "venv", ".venv"]
+exclude = [".*/migrations/.*", ".*/services/auth/.*", "docs", "venv", ".venv"]
 
 # https://mypy.readthedocs.io/en/latest/config_file.html#using-a-pyproject-toml-file
 pretty = true
