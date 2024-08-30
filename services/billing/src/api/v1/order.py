@@ -1,15 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from fastapi import APIRouter, Cookie, Depends
+from schemas.authentication import UserAuthError, UserAuthInfoResponce  # noqa: TCH002
 from schemas.cookie import AccessTokenCookie
 
 from services.authentication import AuthService, get_auth_service
-
-if TYPE_CHECKING:
-    from schemas.authentication import UserAuthError, UserAuthInfoResponce
-
 
 router = APIRouter()
 
