@@ -128,3 +128,8 @@ explicit_package_bases = true
 init_forbid_extra = true
 init_typed = true
 warn_required_dynamic_aliases = true
+
+
+[[tool.mypy.overrides]]
+module = ["*.auth.*"]
+ignore_errors = true

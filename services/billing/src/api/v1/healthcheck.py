@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 
 router = APIRouter()
 
 
 @router.get("/check")
-async def health_check(request: Request) -> dict[str, str]:  # noqa: ARG001
+async def health_check() -> dict[str, str]:
     return {"status": "ok"}

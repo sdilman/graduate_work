@@ -45,11 +45,20 @@ class PGSettings(DefaultSettings):
     model_config = SettingsConfigDict(env_prefix="PG_")
 
 
+class Auth(DefaultSettings):
+    access_name: str = Field(...)
+    refresh_name: str = Field(...)
+    url_user: str = Field(...)
+
+    model_config = SettingsConfigDict(env_prefix="AUTH_")
+
+
 class Settings:
     debug: bool = False
     app: AppSettings = AppSettings()
     api: ApiSettings = ApiSettings()
     pg: PGSettings = PGSettings()
+    auth: Auth = Auth()
 
 
 settings = Settings()

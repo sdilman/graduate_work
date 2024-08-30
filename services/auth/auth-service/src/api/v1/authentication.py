@@ -106,6 +106,19 @@ async def check_refresh_token(
     return result
 
 
+@router.post("/user", status_code=status.HTTP_200_OK)
+async def get_user_id(
+    payload: dict[str, str],
+    jwt_service: JWTService = Depends(get_jwt_service),
+    db: AsyncSession = Depends(get_pg_session),
+    base_service: BaseService = Depends(get_base_service),
+):
+    input_token_value = payload["input_token"]
+    access_token_dict = await check_access_token(input_token=input_token_value, jwt_service=jwt_service)
+    user = await get_user(db=db, base_service=base_service, access_token_dict=access_token_dict)
+    return {"sso_id": user.id}
+
+
 @router.post("/login", status_code=status.HTTP_200_OK)
 async def login_user_for_access_token_cookie(
     request: Request,
