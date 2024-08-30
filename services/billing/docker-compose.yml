@@ -10,6 +10,8 @@ services:
       - ${APP_PORT}:${APP_PORT}
     expose:
       - ${APP_PORT}
+    networks:
+      - graduate-work
 
   billing_app_postgres:
     image: postgres:15
@@ -30,3 +32,9 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
+    networks:
+      - graduate-work
+
+networks:
+  graduate-work:
+    name: graduate-work

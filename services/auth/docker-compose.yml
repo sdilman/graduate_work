@@ -11,7 +11,7 @@ services:
     volumes:
       - pg_prod_auth_data:/var/lib/postgresql/data
     networks:
-      - movies-auth-app
+      - graduate-work
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${PG_USER} -d ${PG_DB} -p ${PG_PORT}" ]
       interval: 30s
@@ -24,7 +24,7 @@ services:
     volumes:
       - ./configs/redis.conf:/usr/local/etc/redis/redis.conf:ro
     networks:
-      - movies-auth-app
+      - graduate-work
     expose:
       - ${REDIS_PORT}
     healthcheck:
@@ -37,8 +37,7 @@ services:
     volumes:
       - .env:/.env:ro
     networks:
-      - movies-auth-app
-      - movies-cluster
+      - graduate-work
     expose:
       - ${API_PORT}
     ports:
@@ -65,14 +64,11 @@ services:
     environment:
       - GOMAXPROCS=2
     networks:
-      - movies-auth-app
-      - movies-cluster
+      - graduate-work
 
 volumes:
   pg_prod_auth_data:
 
 networks:
-  movies-auth-app:
-    name: movies-auth-app
-  movies-cluster:
-    name: movies-cluster
+  graduate-work:
+    name: graduate-work
