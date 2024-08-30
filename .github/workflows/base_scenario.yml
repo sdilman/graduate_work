@@ -33,13 +33,17 @@ jobs:
       - name: Set change flag and files
         id: check
         run: |
-          if [ "${{ steps.changed-files.outputs.any_changed }}" == "true" ]; then
-            echo "has_changes=${{ steps.changed-files.outputs.any_changed }}" >> $GITHUB_OUTPUT
-            echo "changed_files=${{ steps.changed-files.outputs.all_changed_files }}" >> $GITHUB_OUTPUT
+          CHANGED_FILES=$(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' '\n' | \
+          grep -v -E "^(auth|migrations)/" | tr '\n' ' ')
+
+          if [ -n "$CHANGED_FILES" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "changed_files=" >> $GITHUB_OUTPUT
           fi
+
 
   tests:
     needs: [check]
