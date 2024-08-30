@@ -45,18 +45,9 @@ class PGSettings(DefaultSettings):
     model_config = SettingsConfigDict(env_prefix="PG_")
 
 
-# class JWTToken(DefaultSettings):
-#     secret_key: str = Field(...)
-#     algorithm: str = Field(...)
-#     at_expire_minutes: str = Field(...)
-#     rt_expire_minutes: str = Field(...)
-
-#     model_config = SettingsConfigDict(env_prefix="JWT_")
-
-
 class Auth(DefaultSettings):
     access_name: str = Field(...)
-    refresh_name: str = Field(...) 
+    refresh_name: str = Field(...)
     url_user: str = Field(...)
 
     model_config = SettingsConfigDict(env_prefix="AUTH_")
@@ -67,7 +58,6 @@ class Settings:
     app: AppSettings = AppSettings()
     api: ApiSettings = ApiSettings()
     pg: PGSettings = PGSettings()
-    #jwt: JWTToken = JWTToken()
     auth: Auth = Auth()
 
 

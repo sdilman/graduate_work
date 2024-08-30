@@ -1,12 +1,15 @@
 from __future__ import annotations
 
-from typing import Dict
+from typing import TYPE_CHECKING
 
-from fastapi import APIRouter, Request, Cookie, Depends
+from fastapi import APIRouter, Cookie, Depends
+from schemas.cookie import AccessTokenCookie
 
-from schemas.cookie import AccessTokenCookie, RefreshTokenCookie
-from schemas.authentication import UserAuthInfoResponce, UserAuthError
 from services.authentication import AuthService, get_auth_service
+
+if TYPE_CHECKING:
+    from schemas.authentication import UserAuthError, UserAuthInfoResponce
+
 
 router = APIRouter()
 
@@ -14,7 +17,6 @@ router = APIRouter()
 @router.get("/create")
 async def create_order(
     input_token: str = Cookie(alias=AccessTokenCookie.name),
-    auth_service: AuthService = Depends(get_auth_service)
+    auth_service: AuthService = Depends(get_auth_service),  # noqa: B008
 ) -> UserAuthInfoResponce | UserAuthError:
-    response = await auth_service.authenticate_user(input_token)
-    return response
+    return await auth_service.authenticate_user(input_token)

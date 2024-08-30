@@ -1,16 +1,12 @@
+from __future__ import annotations
+
+from dataclasses import asdict
 from functools import lru_cache
 
 import httpx
 
-from dataclasses import asdict
-
 from core.config import settings
-
-from schemas.authentication import (
-    UserAuthInfoRequest, 
-    UserAuthInfoResponce, 
-    UserAuthError
-)
+from schemas.authentication import UserAuthError, UserAuthInfoRequest, UserAuthInfoResponce
 
 
 class AuthService:
@@ -21,11 +17,9 @@ class AuthService:
             response = await client.post(url, json=asdict(payload))
             if response.status_code == 200:
                 return UserAuthInfoResponce(**response.json())
-            else:
-                return UserAuthError(message=response.status_code)
+            return UserAuthError(message=response.status_code)
 
 
-@lru_cache()
+@lru_cache
 def get_auth_service():
     return AuthService()
-

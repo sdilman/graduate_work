@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from typing import Dict
-
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 
 router = APIRouter()
 
 
 @router.get("/check")
-async def health_check(request: Request) -> Dict[str, str]:
+async def health_check() -> dict[str, str]:
     return {"status": "ok"}
