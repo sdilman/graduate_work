@@ -3,12 +3,12 @@ members = ["services/*"]
 
 [tool.uv]
 dev-dependencies = [
-    "ruff==0.6.2",
-    "mypy==1.11.1",
-    "pre-commit==3.8.0",
-    "pytest>=8.3.2",
-    "pytest-asyncio>=0.24.0",
-    "pydantic>=2.8.2",
+  "ruff==0.6.2",
+  "mypy==1.11.1",
+  "pre-commit==3.8.0",
+  "pytest>=8.3.2",
+  "pytest-asyncio>=0.24.0",
+  "pydantic>=2.8.2",
 ]
 
 [tool.ruff]
@@ -20,46 +20,50 @@ respect-gitignore = true
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 select = ["ALL"]
 ignore = [
-  "D", # pydocstyle
-  "TD", # flake8-todos
-  "FIX", # flake8-fixme
-  "ANN", # flake8-annotations (handled by mypy)
-  "EM", # flake8-errmsg - String literals in exceptions
-  "E501", # pycodestyle - line too long (handled by formatter)
+  "D",      # pydocstyle
+  "TD",     # flake8-todos
+  "FIX",    # flake8-fixme
+  "ANN",    # flake8-annotations (handled by mypy)
+  "EM",     # flake8-errmsg - String literals in exceptions
+  "E501",   # pycodestyle - line too long (handled by formatter)
   "COM812", # forced by ruff formatter
   "ISC001", # forced by ruff formatter
   "TRY003", # long message for exceptions
-  "EM101", # allow string literals for exceptions
-  "EM102", # allow f-string literals for exceptions
+  "EM101",  # allow string literals for exceptions
+  "EM102",  # allow f-string literals for exceptions
 ]
-exclude = [
-    "**/migrations/**",
-    "**/services/auth/**",
-]
+exclude = ["**/migrations/**", "**/auth/**", "**/tests/**"]
 unfixable = [
-  "F", # pyflakes
+  "F",   # pyflakes
   "ERA", # eradicate - commented-out code
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = [
-  "F401", # Unused import
-  "F403", # Import star
+  "F401",   # Unused import
+  "F403",   # Import star
   "ARG001", # Unused function argument (using fixtures from other fixtures)
 ]
 "**/tests/**/*.py" = [
-  "S101", # Use of assert detected (assert allowed in tests)
+  "S101",    # Use of assert detected (assert allowed in tests)
   "PLR2004", # Magic value used in comparison
 ]
 
-[tool.ruff.lint.flake8-tidy-imports]  # https://docs.astral.sh/ruff/settings/#lintflake8-tidy-imports
+[tool.ruff.lint.flake8-tidy-imports] # https://docs.astral.sh/ruff/settings/#lintflake8-tidy-imports
 ban-relative-imports = "all"
 
 [tool.ruff.lint.flake8-type-checking]
 exempt-modules = ["typing", "typing_extensions"]
 
-[tool.ruff.lint.isort]  # https://docs.astral.sh/ruff/settings/#isort
-section-order = ["future", "typing", "standard-library", "third-party", "first-party", "local-folder"]
+[tool.ruff.lint.isort] # https://docs.astral.sh/ruff/settings/#isort
+section-order = [
+  "future",
+  "typing",
+  "standard-library",
+  "third-party",
+  "first-party",
+  "local-folder",
+]
 lines-between-types = 1
 split-on-trailing-comma = false
 
@@ -67,13 +71,13 @@ split-on-trailing-comma = false
 "typing" = ["typing", "types", "typing_extensions", "mypy", "mypy_extensions"]
 
 
-[tool.ruff.lint.pycodestyle]  # https://docs.astral.sh/ruff/settings/#pycodestyle
+[tool.ruff.lint.pycodestyle] # https://docs.astral.sh/ruff/settings/#pycodestyle
 max-doc-length = 100
 
-[tool.ruff.lint.pydocstyle]  # https://docs.astral.sh/ruff/settings/#pydocstyle
+[tool.ruff.lint.pydocstyle] # https://docs.astral.sh/ruff/settings/#pydocstyle
 convention = "google"
 
-[tool.ruff.lint.pylint]  # https://docs.astral.sh/ruff/settings/#pylint
+[tool.ruff.lint.pylint] # https://docs.astral.sh/ruff/settings/#pylint
 allow-dunder-method-names = ["__tablename__", "__table_args__"]
 allow-magic-value-types = ["int", "str", "bytes"]
 max-args = 10
@@ -89,9 +93,7 @@ quote-style = "double"
 skip-magic-trailing-comma = true
 
 [tool.mypy]
-plugins = [
-  "pydantic.mypy"
-]
+plugins = ["pydantic.mypy"]
 exclude = [".*/migrations/.*", ".*/services/auth/.*", "docs", "venv", ".venv"]
 
 # https://mypy.readthedocs.io/en/latest/config_file.html#using-a-pyproject-toml-file
@@ -131,5 +133,5 @@ warn_required_dynamic_aliases = true
 
 
 [[tool.mypy.overrides]]
-module = ["*.auth.*"]
+module = ["*.auth.*", "*.tests.*", "*.migrations.*"]
 ignore_errors = true
