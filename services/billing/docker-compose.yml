@@ -13,7 +13,6 @@ services:
     <<: *default
     build:
       context: .
-      dockerfile: Dockerfile
     ports:
     - ${APP_PORT}:${APP_PORT}
     expose:
@@ -23,9 +22,9 @@ services:
     <<: *default
     image: postgres:15
     expose:
-    - ${PG_PORT}
+    - ${POSTGRES_PORT}
     ports:
-    - ${PG_PORT}:${PG_PORT}
+    - ${POSTGRES_PORT}:${POSTGRES_PORT}
     volumes:
     - pg_prod_billing_data:/var/lib/postgresql/data
 
