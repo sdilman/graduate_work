@@ -1,3 +1,5 @@
+ONESHELL:
+
 .PHONY: env
 env:
 	@find services -name ".env.example" | while read file; do \
