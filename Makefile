@@ -10,23 +10,26 @@ env:
 up_all: env
 	@docker compose -f docker-compose.yml up --build
 
+
+.PHONY: up_auth
+up_auth: env
+	@docker compose -f services/auth/docker-compose.yml -f docker/docker-compose.yml up --build
+
 .PHONY: up_service
 up_service: env
-	@docker compose -f services/billing/docker-compose.yml up --build
+	@docker compose -f services/billing/docker-compose.yml -f docker/docker-compose.yml up --build
 
 .PHONY: up_test_f
 up_test_f: env
-	@docker compose -f services/billing/tests/functional/docker-compose.yml up --build
+	@docker compose -f services/billing/tests/functional/docker-compose.yml -f docker/docker-compose.yml up --build
 
 .PHONY: up_test_i
 up_test_i: env
-	@docker compose -f services/billing/tests/integration/docker-compose.yml up --build
+	@docker compose -f services/billing/tests/integration/docker-compose.yml -f docker/docker-compose.yml up --build
 
 .PHONY: down
 down:
-	@find services -name "docker-compose.yml" | while read file; do \
-		docker compose -f "$$file" down -v || true; \
-	done
+	@docker compose down -v
 
 .PHONY: clean
 clean: down
@@ -49,7 +52,14 @@ activate:
 
 .PHONY: pre-commit
 pre-commit:
-	@pre-commit install
+	@pre-commit clean
+	@pre-commit install --install-hooks
+
+
+.PHONY: update-pythonpath
+update-pythonpath:
+	@echo PYTHONPATH=$(find $(pwd)/services -type d -name "src" | paste -sd ":" -)
+
 
 .PHONY: setup
 setup: sync activate pre-commit
