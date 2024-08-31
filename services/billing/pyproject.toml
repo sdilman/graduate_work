@@ -5,7 +5,7 @@ requires = ["hatchling"]
 [project]
 dependencies = [
   "fastapi>=0.112.1",
-  "pydantic>=2.8.2",
+  "pydantic[email]>=2.8.2",
   "pydantic-settings>=2.4.0",
   "fastapi-pagination>=0.12.26",
   "backoff>=2.2.1",
@@ -42,6 +42,3 @@ log_cli = true
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli_format = "%(asctime)s [%(levelname)s] %(message)s (%(filename)s:%(lineno)s)"
 log_cli_level = "DEBUG"
-
-[tool.uv]
-dev-dependencies = []
