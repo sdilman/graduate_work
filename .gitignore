@@ -49,11 +49,9 @@ docs/_build/
 *.DS_Store
 
 # Windows
-Thumbs.db
 
 # Distribution / packaging
 .Python
-env/
 pip-log.txt
 pytest_cache/
 tox/
@@ -62,3 +60,5 @@ tox/
 node_modules/
 coverage/
 .cache/
+.mypy_cache/
+.ruff_cache/

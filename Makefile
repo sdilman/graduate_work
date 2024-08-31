@@ -1,10 +1,8 @@
-ACTIVATE=.venv/bin/activate
-
 .PHONY: env
 env:
-	@cp services/billing/.env.example services/billing/.env
-	@cp services/billing/tests/functional/.env.example services/billing/tests/functional/.env
-	@cp services/billing/tests/integration/.env.example services/billing/tests/integration/.env
+	@find services -name ".env.example" | while read file; do \
+		cp "$$file" "$$(dirname $$file)/.env"; \
+	done
 
 .PHONY: up_service
 up_service: env
@@ -20,9 +18,9 @@ up_test_i: env
 
 .PHONY: down
 down:
-	- docker compose -f services/billing/docker-compose.yml down -v || true
-	- docker compose -f services/billing/tests/functional/docker-compose.yml down -v  || true
-	- docker compose -f services/billing/tests/integration/docker-compose.yml down -v  || true
+	@find services -name "docker-compose.yml" | while read file; do \
+		docker compose -f "$$file" down -v || true; \
+	done
 
 .PHONY: clean
 clean: down
@@ -36,11 +34,12 @@ clean: down
 .PHONY: sync
 sync:
 	@curl -LsSf https://astral.sh/uv/install.sh | sh
-	@uv sync --frozen
+	@uv venv
+	@uv sync --frozen --all-extras
 
 .PHONY: activate
 activate:
-	. .venv/bin/activate
+	@SHELL_PATH=$$($$SHELL -c 'echo $$SHELL') && . .venv/bin/activate && exec $$SHELL_PATH
 
 .PHONY: pre-commit
 pre-commit:
@@ -49,8 +48,7 @@ pre-commit:
 .PHONY: setup
 setup: sync activate pre-commit
 
-
-.PHONY: activate.bk
-activate.bk:
-	@SHELL_PATH=$$($$SHELL -c 'echo $$SHELL') && . .venv/bin/activate && exec $$SHELL_PATH
-	@SHELL_PATH=$$($$SHELL -c 'echo $$SHELL') && . .venv/bin/activate && exec $$SHELL_PATH
+.PHONY: check
+check:
+	@git add .
+	@pre-commit run
