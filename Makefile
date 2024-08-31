@@ -4,6 +4,10 @@ env:
 		cp "$$file" "$$(dirname $$file)/.env"; \
 	done
 
+.PHONY: up_all
+up_all: env
+	@docker compose -f docker-compose.yml up --build
+
 .PHONY: up_service
 up_service: env
 	@docker compose -f services/billing/docker-compose.yml up --build
