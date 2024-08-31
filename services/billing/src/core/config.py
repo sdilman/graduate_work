@@ -41,8 +41,9 @@ class PGSettings(DefaultSettings):
     dsn: str = Field(...)
     dsn_local: str = Field(...)
     async_schema: str = Field(...)
+    dsn_pg: str = Field(...)
 
-    model_config = SettingsConfigDict(env_prefix="PG_")
+    model_config = SettingsConfigDict(env_prefix="POSTGRES_")
 
 
 class Auth(DefaultSettings):

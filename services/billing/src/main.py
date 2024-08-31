@@ -1,11 +1,12 @@
 import uvicorn
 
-from api import router as router_api
-from core import exceptions
-from core.config import settings
-from core.logger import setup_logging
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+
+from api import router as router_api
+from core.config import settings
+from core.exceptions import register_exception_handlers
+from core.logger import setup_logging
 
 # TODO: from helpers.lifespan import lifespan
 from helpers.middleware import BaseMiddleware
@@ -23,7 +24,7 @@ app = FastAPI(
 )
 
 app.add_middleware(BaseMiddleware)
-exceptions.register_exception_handlers(app=app)
+register_exception_handlers(app=app)
 app.include_router(router_api, prefix="/api")
 
 if __name__ == "__main__":

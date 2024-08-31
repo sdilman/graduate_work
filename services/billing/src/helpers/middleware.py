@@ -1,11 +1,12 @@
 from typing import Any, Callable
 
-from core.config import settings as config
-from core.logger import get_logger
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
+
+from core.config import settings as config
+from core.logger import get_logger
 
 logger = get_logger(__name__)
 

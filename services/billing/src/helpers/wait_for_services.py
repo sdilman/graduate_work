@@ -4,8 +4,9 @@ from logging import getLogger
 
 import backoff
 
-from core.config import settings
 from sqlalchemy.ext.asyncio import create_async_engine
+
+from core.config import settings
 
 logger = getLogger(__name__)
 
