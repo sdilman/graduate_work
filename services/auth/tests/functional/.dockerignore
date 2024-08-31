@@ -26,6 +26,3 @@ venv/
 # Node and frontend
 node_modules/
 dist/
-
-# Docker images
-Dockerfile

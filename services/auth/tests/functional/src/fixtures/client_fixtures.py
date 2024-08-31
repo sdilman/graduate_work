@@ -2,7 +2,7 @@ import aiohttp
 import backoff
 import pytest_asyncio
 
-from src.tests.functional.settings import test_base_settings
+from core.settings import test_base_settings
 
 
 @pytest_asyncio.fixture(name="client_session", scope="session")

@@ -3,7 +3,7 @@ import pytest_asyncio
 
 from redis.asyncio import Redis
 
-from src.tests.functional.settings import test_base_settings
+from core.settings import test_base_settings
 
 
 @pytest_asyncio.fixture(name="redis_client", scope="session")

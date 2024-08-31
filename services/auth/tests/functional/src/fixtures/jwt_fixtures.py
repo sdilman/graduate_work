@@ -3,10 +3,10 @@ from datetime import UTC, datetime, timedelta
 import pytest_asyncio
 
 from jose import jwt
+from testdata.jwt_tokens import JWTtokens
 
-from src.schema.model import AccessTokenData
-from src.tests.functional.settings import test_base_settings
-from src.tests.functional.testdata.jwt_tokens import JWTtokens
+from core.settings import test_base_settings
+from schemas.model import AccessTokenData
 
 
 @pytest_asyncio.fixture(name="get_access_token")

@@ -4,8 +4,8 @@ import pytest_asyncio
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from src.models.db_entity import Base
-from src.tests.functional.settings import test_base_settings as settings
+from core.settings import test_base_settings as settings
+from models.db_entity import Base
 
 dsn = f"postgresql+asyncpg://{settings.pg_user}:{settings.pg_password}@{settings.pg_host}:{settings.pg_port}/{settings.pg_db}"
 engine = create_async_engine(dsn, echo=False, future=True)

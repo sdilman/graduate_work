@@ -2,8 +2,9 @@ from http import HTTPStatus
 
 import pytest
 
-from src.models.db_entity import Permission, Role, User
-from src.tests.functional.testdata.jwt_tokens import JWTtokens
+from testdata.jwt_tokens import JWTtokens
+
+from models.db_entity import Permission, Role, User
 
 # All test coroutines will be treated as marked.
 pytestmark = pytest.mark.asyncio

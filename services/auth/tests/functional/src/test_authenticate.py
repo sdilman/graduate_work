@@ -2,9 +2,9 @@ from http import HTTPStatus
 
 import pytest
 
-from src.tests.functional.fixtures.pg_fixtures import User
-from src.tests.functional.testdata.jwt_tokens import JWTtokens
-from src.tests.functional.testdata.pg_db_data_input import user_login_data  # noqa: F401
+from fixtures.pg_fixtures import User
+from testdata.jwt_tokens import JWTtokens
+from testdata.pg_db_data_input import user_login_data  # noqa: F401
 
 # All test coroutines will be treated as marked.
 pytestmark = pytest.mark.asyncio

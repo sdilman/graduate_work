@@ -4,13 +4,20 @@ Module to store all test settings in one place.
 
 import os
 
+from dotenv import find_dotenv, load_dotenv
 from pydantic import ConfigDict, Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+load_dotenv(find_dotenv())
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-class TestBaseSettings(BaseSettings):
+class DefaultSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+
+class TestBaseSettings(DefaultSettings):
     model_config = ConfigDict(extra="ignore")
     # Postgres
     pg_db: str = Field("", env="PG_DB")
@@ -32,4 +39,4 @@ class TestBaseSettings(BaseSettings):
     current_folder: str = Field(current_dir)
 
 
-test_base_settings = TestBaseSettings(_env_file="../../../../.env", _env_file_encoding="utf-8")
+test_base_settings = TestBaseSettings()
