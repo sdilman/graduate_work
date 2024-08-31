@@ -1,61 +1,46 @@
+x-default: &default
+  restart: unless-stopped
+  networks:
+  - graduate-work
+  env_file:
+  - .env
+  depends_on:
+    python_base:
+      condition: service_completed_successfully
+
+x-logging: &logging
+  logging:
+    driver: gelf
+    options:
+      gelf-address: udp://127.0.0.1:5044
+      tag: auth
+
 services:
   auth_app_postgres:
+    <<: *default
     image: postgres:15
-    environment:
-      POSTGRES_DB: ${PG_DB}
-      POSTGRES_USER: ${PG_USER}
-      POSTGRES_PASSWORD: ${PG_PASSWORD}
-      PGPORT: ${PG_PORT}
     expose:
-    - ${PG_PORT}
+    - ${POSTGRES_PORT}
+    ports:
+    - ${POSTGRES_PORT}:${POSTGRES_PORT}
     volumes:
     - pg_prod_auth_data:/var/lib/postgresql/data
-    networks:
-    - graduate-work
-    healthcheck:
-      test: [CMD-SHELL, 'pg_isready -U ${PG_USER} -d ${PG_DB} -p ${PG_PORT}']
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
 
   auth_app_redis:
+    <<: *default
     image: redis:7.2.4
-    volumes:
-    - ./configs/redis.conf:/usr/local/etc/redis/redis.conf:ro
-    networks:
-    - graduate-work
     expose:
     - ${REDIS_PORT}
-    healthcheck:
-      test: [CMD, redis-cli, --raw, incr, ping]
 
   auth_app_backend:
+    <<: [*default, *logging]
     build:
-      context: ./auth-service
-      target: prod
-    volumes:
-    - .env:/.env:ro
-    networks:
-    - graduate-work
+      context: .
     expose:
     - ${API_PORT}
-    ports:
-    - ${API_PORT}:${API_PORT}
-    env_file:
-    - .env
-    depends_on:
-      auth_app_postgres:
-        condition: service_healthy
-      auth_app_redis:
-        condition: service_healthy
-    logging:
-      driver: gelf
-      options:
-        gelf-address: udp://127.0.0.1:5044
-        tag: auth_app_backend
 
   auth_app_jaeger:
+    <<: *default
     image: jaegertracing/all-in-one:1.20.0
     container_name: jaeger
     ports:
@@ -63,8 +48,6 @@ services:
     - 16686:16686
     environment:
     - GOMAXPROCS=2
-    networks:
-    - graduate-work
 
 volumes:
   pg_prod_auth_data:
