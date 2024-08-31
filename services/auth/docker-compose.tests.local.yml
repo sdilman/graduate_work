@@ -8,11 +8,11 @@ services:
       POSTGRES_PASSWORD: ${PG_PASSWORD}
       PGPORT: ${PG_PORT}
     expose:
-      - ${PG_PORT}
+    - ${PG_PORT}
     ports:
-      - ${PG_PORT}:${PG_PORT}
+    - ${PG_PORT}:${PG_PORT}
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${PG_USER} -d ${PG_DB} -p ${PG_PORT}" ]
+      test: [CMD-SHELL, 'pg_isready -U ${PG_USER} -d ${PG_DB} -p ${PG_PORT}']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -20,8 +20,8 @@ services:
   auth_redis:
     image: redis:7.2.4
     expose:
-      - ${REDIS_PORT}
+    - ${REDIS_PORT}
     ports:
-      - ${REDIS_PORT}:6379
+    - ${REDIS_PORT}:6379
     healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      test: [CMD, redis-cli, --raw, incr, ping]

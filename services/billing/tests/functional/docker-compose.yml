@@ -5,7 +5,7 @@ services:
       context: ../../
       dockerfile: tests/functional/Dockerfile
     env_file:
-      - .env
+    - .env
 
   billing_app_postgres:
     image: postgres:15
@@ -15,11 +15,11 @@ services:
       POSTGRES_PASSWORD: ${PG_PASSWORD}
       PGPORT: ${PG_PORT}
     expose:
-      - "${PG_PORT}"
+    - ${PG_PORT}
     ports:
-      - "${PG_PORT}:${PG_PORT}"
+    - ${PG_PORT}:${PG_PORT}
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${PG_USER} -d ${PG_DB} -p ${PG_PORT}" ]
+      test: [CMD-SHELL, 'pg_isready -U ${PG_USER} -d ${PG_DB} -p ${PG_PORT}']
       interval: 30s
       timeout: 10s
       retries: 5
