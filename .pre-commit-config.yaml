@@ -11,7 +11,7 @@ repos:
   rev: v2.14.0
   hooks:
   - id: pretty-format-toml
-    args: [--autofix, --indent, '2']
+    args: [--autofix, --indent, '2', --inline-comment-spaces, '2', --trailing-commas]
   - id: pretty-format-yaml
     args: [--autofix, --indent, '2']
 
