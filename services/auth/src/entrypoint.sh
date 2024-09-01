@@ -2,7 +2,7 @@
 set -e
 set -x
 
-python -m helpers.wait_for_it &
+python -m helpers.wait_for_services &
 PG_PID=$!
 
 wait $PG_PID

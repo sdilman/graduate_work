@@ -1,3 +1,4 @@
+import logging
 from logging import config
 
 import sentry_sdk
@@ -37,3 +38,8 @@ def setup_logging():
             traces_sample_rate=settings.sentry_traces_sample_rate,
             profiles_sample_rate=settings.sentry_profiles_sample_rate,
         )
+
+
+def get_logger(name: str) -> logging.Logger:
+    setup_logging()
+    return logging.getLogger(name)

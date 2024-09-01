@@ -17,7 +17,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # On startup events
     logging.info("Config: %s", vars(settings))
-    redis_db.redis = Redis(host=settings.redis_host, port=settings.redis_port)
+    redis_db.redis = Redis(host=settings.redis.host, port=settings.redis.port)
     await FastAPILimiter.init(redis_db.redis)
 
     if settings.jaeger_enable_tracer:

@@ -43,6 +43,14 @@ class PostgresSettings(DefaultSettings):
     model_config = SettingsConfigDict(env_prefix="POSTGRES_")
 
 
+class RedisSettings(DefaultSettings):
+    host: str = Field("127.0.0.1")
+    port: int = Field(6380)
+    dsn: str = Field("")
+
+    model_config = SettingsConfigDict(env_prefix="REDIS_")
+
+
 class Settings(DefaultSettings):
     """Class to store fastapi project settings."""
 
@@ -51,13 +59,9 @@ class Settings(DefaultSettings):
     project_root: str = Field(default="app")
     api_port: str = Field("api_port", env="API_PORT")
     # Redis
-    redis_host: str = Field("127.0.0.1", env="REDIS_HOST")
-    redis_port: int = Field(6380, env="REDIS_PORT")
-    redis_dsn: str = Field("")
-
+    redis: RedisSettings = RedisSettings()
     # Postgres
     pg: PostgresSettings = PostgresSettings()
-
     # Backoff
     backoff: BackoffSettings = BackoffSettings()
 
