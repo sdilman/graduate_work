@@ -72,7 +72,7 @@ jobs:
       # 4. Install missing stub packages
     - name: Install missing type stubs
       run: |
-        echo "${{ needs.check.outputs.changed_files }}" | xargs mypy --install-types
+        echo "${{ needs.check.outputs.changed_files }}" | xargs yes | mypy --install-types
 
       # 5. Run Ruff Linter and show all errors
     - name: Run Ruff Linter
