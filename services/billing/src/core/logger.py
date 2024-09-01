@@ -33,8 +33,8 @@ LOGGING = {
 
 def setup_logging() -> None:
     config.dictConfig(LOGGING)
-    # TODO: add sentry if necessary
 
 
 def get_logger(name: str) -> logging.Logger:
+    setup_logging()
     return logging.getLogger(name)

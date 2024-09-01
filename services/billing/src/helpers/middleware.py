@@ -5,8 +5,8 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-from core.config import settings as config
 from core.logger import get_logger
+from core.settings import settings as config
 
 logger = get_logger(__name__)
 

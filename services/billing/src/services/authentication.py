@@ -5,7 +5,7 @@ from functools import lru_cache
 
 import httpx
 
-from core.config import settings
+from core.settings import settings
 from schemas.authentication import UserAuthError, UserAuthInfoRequest, UserAuthInfoResponce
 
 

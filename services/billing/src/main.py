@@ -4,9 +4,9 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
 from api import router as router_api
-from core.config import settings
 from core.exceptions import register_exception_handlers
 from core.logger import setup_logging
+from core.settings import settings
 
 # TODO: from helpers.lifespan import lifespan
 from helpers.middleware import BaseMiddleware

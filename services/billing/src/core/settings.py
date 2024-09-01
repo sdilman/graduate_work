@@ -1,18 +1,14 @@
-import os
-
+from dotenv import find_dotenv, load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+load_dotenv(find_dotenv())
 
 
 class DefaultSettings(BaseSettings):
     """Class to store default project settings."""
 
-    env_file: str = "../.env"
-
-    if os.getenv("IS_TEST_FUNCTIONAL"):
-        env_file = "../tests/functional/.env"
-
-    model_config = SettingsConfigDict(env_file=env_file, env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
 class AppSettings(DefaultSettings):
@@ -54,12 +50,29 @@ class Auth(DefaultSettings):
     model_config = SettingsConfigDict(env_prefix="AUTH_")
 
 
+class BackoffSettings(DefaultSettings):
+    max_tries: int = Field(default=10)
+    max_time: int = Field(default=60)
+
+    model_config = SettingsConfigDict(env_prefix="BACKOFF_")
+
+
+class RedisSettings(DefaultSettings):
+    host: str = Field("127.0.0.1")
+    port: int = Field(6380)
+    dsn: str = Field("")
+
+    model_config = SettingsConfigDict(env_prefix="REDIS_")
+
+
 class Settings:
     debug: bool = False
     app: AppSettings = AppSettings()
     api: ApiSettings = ApiSettings()
     pg: PGSettings = PGSettings()
     auth: Auth = Auth()
+    redis: RedisSettings = RedisSettings()
+    backoff: BackoffSettings = BackoffSettings()
 
 
 settings = Settings()
