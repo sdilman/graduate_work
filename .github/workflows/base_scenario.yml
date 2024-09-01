@@ -72,7 +72,7 @@ jobs:
       # 4. Install missing stub packages
     - name: Install missing type stubs
       run: |
-        yes | mypy --install-types .
+        yes | mypy --install-types . || true
 
       # 5. Run Ruff Linter and show all errors
     - name: Run Ruff Linter
