@@ -43,7 +43,7 @@ class RedisConnectionChecker(InterfaceCheckConnection):
 
     async def check_connection(self) -> bool:
         client = redis.asyncio.from_url(config.redis.dsn)
-        return await client.ping()
+        return bool(await client.ping())
 
 
 class ServiceWaiter:
