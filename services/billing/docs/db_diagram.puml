@@ -1,14 +1,5 @@
 @startuml
 
-
-entity User {
-  * sso_id
-  --
-  * email
-  * created_at
-  * updated_at
-}
-
 entity Transaction {
   * id
   --
@@ -19,6 +10,7 @@ entity Transaction {
   * currency
   * created_at
   * updated_at
+  * closed_at
 }
 
 entity Product {
@@ -30,6 +22,7 @@ entity Product {
   * basic_currency
   * created_at
   * updated_at
+  * closed_at
 }
 
 entity OrderProduct {
@@ -37,6 +30,9 @@ entity OrderProduct {
   * order_id
   * product_id
   --
+  * created_at
+  * updated_at
+  * closed_at
 }
 
 entity UserProduct {
@@ -49,16 +45,19 @@ entity UserProduct {
   * renewal_enabled: [false, true]
   * created_at
   * updated_at
+  * closed_at
 }
 
 entity Order {
   * id
+  * user_id
   --
   * status: [pending, paid, refunding, refunded]
   * total_amount
   * currency
   * created_at
   * updated_at
+  * closed_at
 }
 
 entity PaymentMethod {
@@ -71,14 +70,12 @@ entity PaymentMethod {
   * is_active: true, false
   * created_at
   * updated_at
+  * closed_at
 }
 
 Transaction }|..|| Order
-UserProduct }|..|| User
 UserProduct }|..|| Product
 OrderProduct }|..|| Product
 OrderProduct }|..|| Order
-PaymentMethod }|..|| User
-
 
 @enduml
