@@ -63,6 +63,11 @@ ignore = [
   "TRY003",  # long message for exceptions
   "EM101",  # allow string literals for exceptions
   "EM102",  # allow f-string literals for exceptions
+  "TCH001",  # allow application import stay not in a type-checking block
+  "TCH002",  # allow third-party import stay not in a type-checking block
+  "DTZ005",  # allow datetime without timezone
+  "SIM117",  # allow nested with statements
+  "F841",  # allow unused variables
 ]
 select = ["ALL"]
 unfixable = [
