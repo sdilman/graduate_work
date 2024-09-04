@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from models.pg import Order, OrderProduct, Product
 from schemas.entity import OrderSchema, ProductSchema
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class EntityService:

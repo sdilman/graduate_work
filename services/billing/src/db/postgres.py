@@ -1,8 +1,9 @@
 from typing import AsyncGenerator
 
-from core.logger import get_logger
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+from core.logger import get_logger
 
 logger = get_logger(__name__)
 

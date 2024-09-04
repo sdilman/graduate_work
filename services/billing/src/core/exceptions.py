@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from typing import Any
 
-from core.logger import get_logger
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import ORJSONResponse, Response
 from starlette import status
 from starlette.responses import JSONResponse
+
+from core.logger import get_logger
 
 logger = get_logger(__name__)
 

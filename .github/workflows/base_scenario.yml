@@ -69,18 +69,22 @@ jobs:
         python -m pip install --upgrade pip
         pip install ruff mypy pydantic
 
-      # 4. Run Ruff Linter and show all errors
+      # 4. Install missing stub packages
+    - name: Install missing type stubs
+      run: |
+        mypy --install-types --non-interactive .
+
+      # 5. Run Ruff Linter and show all errors
     - name: Run Ruff Linter
       run: |
         echo "${{ needs.check.outputs.changed_files }}" | xargs ruff check --output-format=github --config=pyproject.toml
 
-
-      # 5. Run Mypy Type Checking and show all errors
+      # 6. Run Mypy Type Checking and show all errors
     - name: Run Mypy Type Checking
       run: |
         echo "${{ needs.check.outputs.changed_files }}" | xargs mypy --config-file=pyproject.toml
 
-      # 6. Set Telegram notification message
+      # 7. Set Telegram notification message
     - name: Set Telegram Notification Message
       run: |
         VERSION="on ${{ github.repository }} for Python ${{ matrix.python-version }}"
@@ -90,7 +94,7 @@ jobs:
           echo "TELEGRAM_MESSAGE=CI/CD pipeline failed $VERSION" >> $GITHUB_ENV
         fi
 
-    # 7. Send notification to Telegram
+    # 8. Send notification to Telegram
     - name: Send Notification to Telegram
       run: |
         curl -s \

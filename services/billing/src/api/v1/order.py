@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import Annotated, Any
 
-from db.postgres import get_pg_session
 from fastapi import APIRouter, Cookie, Depends
-from schemas.cookie import AccessTokenCookie
-from schemas.entity import OrderSchema
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from db.postgres import get_pg_session
+from schemas.cookie import AccessTokenCookie
+from schemas.entity import OrderSchema
 from services.authentication import AuthService, get_auth_service
 from services.entity import EntityService, get_entity_service
 

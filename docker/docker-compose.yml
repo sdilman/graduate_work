@@ -1,0 +1,6 @@
+services:
+  python_base:
+    image: python-base:0.1.0
+    build:
+      context: .
+      dockerfile: python-base.Dockerfile

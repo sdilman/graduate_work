@@ -1,0 +1,24 @@
+x-default: &default
+  restart: unless-stopped
+  env_file:
+  - .env
+  depends_on:
+    python_base:
+      condition: service_completed_successfully
+
+services:
+  auth_postgres:
+    <<: *default
+    image: postgres:15
+    expose:
+    - ${PG_PORT}
+    ports:
+    - ${PG_PORT}:${PG_PORT}
+
+  auth_redis:
+    <<: *default
+    image: redis:7.2.4
+    expose:
+    - ${REDIS_PORT}
+    ports:
+    - ${REDIS_PORT}:6379

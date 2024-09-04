@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import Annotated, Any
 
-from db.postgres import get_pg_session
 from fastapi import APIRouter, Depends
-from schemas.entity import ProductSchema
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from db.postgres import get_pg_session
+from schemas.entity import ProductSchema
 from services.entity import EntityService, get_entity_service
 
 router = APIRouter()

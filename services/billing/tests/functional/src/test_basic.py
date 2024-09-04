@@ -1,6 +1,9 @@
 import pytest
 
-from fixtures.fixture_basic import fixture_dummy, fixture_dummy_async  # noqa: F401
+from fixtures.fixture_basic import (
+    fixture_dummy,  # noqa: F401
+    fixture_dummy_async,
+)
 
 
 def test_dummy_sync(fixture_dummy) -> None:  # type: ignore  # noqa: F811, PGH003
