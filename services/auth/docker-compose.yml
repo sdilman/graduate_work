@@ -38,6 +38,8 @@ services:
       context: .
     expose:
     - ${API_PORT}
+    ports:
+    - ${API_PORT}:${API_PORT}
 
   auth_app_jaeger:
     <<: *default
