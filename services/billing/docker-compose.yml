@@ -1,39 +1,35 @@
-services:
+x-default: &default
+  restart: unless-stopped
+  networks:
+  - graduate-work
+  env_file:
+  - .env
+  depends_on:
+    python_base:
+      condition: service_completed_successfully
 
+services:
   billing_app_backend:
+    <<: *default
     build:
       context: .
-      dockerfile: Dockerfile
-    env_file:
-    - .env
     ports:
     - ${APP_PORT}:${APP_PORT}
     expose:
     - ${APP_PORT}
-    networks:
-    - graduate-work
 
   billing_app_postgres:
+    <<: *default
     image: postgres:15
-    environment:
-      POSTGRES_DB: ${PG_DB}
-      POSTGRES_USER: ${PG_USER}
-      POSTGRES_PASSWORD: ${PG_PASSWORD}
-      PGPORT: ${PG_PORT}
     expose:
-    - ${PG_PORT}
+    - ${POSTGRES_PORT}
     ports:
-    - ${PG_PORT}:${PG_PORT}
+    - ${POSTGRES_PORT}:${POSTGRES_PORT}
     volumes:
-    - ./data/postgres:/var/lib/postgresql/data
-    healthcheck:
-      test: [CMD-SHELL, 'pg_isready -U ${PG_USER} -d ${PG_DB} -p ${PG_PORT}']
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-    networks:
-    - graduate-work
+    - pg_prod_billing_data:/var/lib/postgresql/data
+
+volumes:
+  pg_prod_billing_data:
 
 networks:
   graduate-work:

@@ -1,32 +1,28 @@
 import datetime
 import uuid
 
-from models.enums import Currency, OrderStatus, TransactionStatus, TransactionType
 from sqlalchemy import UUID, Boolean, Column, DateTime, Enum, Float, ForeignKey, String
 from sqlalchemy.orm import DeclarativeBase, relationship
+
+from models.enums import Currency, OrderStatus, TransactionStatus, TransactionType
 
 
 class Base(DeclarativeBase): ...
 
 
-class UUIDMixin:
-    """
-    Adds UUID field to the model
-    """
-
+class BaseMixin:
     __abstract__ = True
     __slots__ = ()
+
+
+class UUIDMixin(BaseMixin):
+    """Add UUID field to the model."""
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
 
 
 class DatesMixin:
-    """
-    Adds timestamp fields to the model
-    """
-
-    __abstract__ = True
-    __slots__ = ()
+    """Add timestamp fields to the model."""
 
     created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.UTC), nullable=False)
     updated_at = Column(DateTime)
