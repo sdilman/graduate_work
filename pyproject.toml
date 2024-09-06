@@ -68,6 +68,7 @@ ignore = [
   "DTZ005",  # allow datetime without timezone
   "SIM117",  # allow nested with statements
   "F841",  # allow unused variables
+  "BLE001",  # catching blind exception
 ]
 select = ["ALL"]
 unfixable = [

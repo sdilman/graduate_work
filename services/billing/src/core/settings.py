@@ -68,8 +68,9 @@ class RedisSettings(DefaultSettings):  # TODO: move to .env, do not use defaults
 class PaymentSettings(DefaultSettings):
     account_id: str = Field(...)
     secret_key: str = Field(...)
+    return_url: str = Field(...)
 
-    model_config = SettingsConfigDict(env_prefix="YUKASSA_")
+    model_config = SettingsConfigDict(env_prefix="YOOKASSA_")
 
 
 class Settings:
