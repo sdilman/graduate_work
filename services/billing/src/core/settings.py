@@ -50,19 +50,26 @@ class Auth(DefaultSettings):
     model_config = SettingsConfigDict(env_prefix="AUTH_")
 
 
-class BackoffSettings(DefaultSettings):
+class BackoffSettings(DefaultSettings):  # TODO: move to .env, do not use defaults in code
     max_tries: int = Field(default=10)
     max_time: int = Field(default=60)
 
     model_config = SettingsConfigDict(env_prefix="BACKOFF_")
 
 
-class RedisSettings(DefaultSettings):
+class RedisSettings(DefaultSettings):  # TODO: move to .env, do not use defaults in code
     host: str = Field("127.0.0.1")
     port: int = Field(6380)
     dsn: str = Field("")
 
     model_config = SettingsConfigDict(env_prefix="REDIS_")
+
+
+class PaymentSettings(DefaultSettings):
+    account_id: str = Field(...)
+    secret_key: str = Field(...)
+
+    model_config = SettingsConfigDict(env_prefix="YUKASSA_")
 
 
 class Settings:
@@ -73,6 +80,7 @@ class Settings:
     auth: Auth = Auth()
     redis: RedisSettings = RedisSettings()
     backoff: BackoffSettings = BackoffSettings()
+    payment: PaymentSettings = PaymentSettings()
 
 
 settings = Settings()
