@@ -5,6 +5,8 @@ participant "Auth API" as auth
 participant "Payment Gateway (Юkassa)" as payment
 participant "Notification Service" as notification
 participant "Monitoring Service" as monitoring
+participant "Logging Service" as logging
+participant "Encryption Service" as encryption
 box end
 
 box Billing Service
@@ -12,8 +14,7 @@ participant "Billing API" as billing
 database "Database" as db
 database "Redis cache" as cache
 queue "Kafka" as kafka
-participant "Logging Service" as logging
-participant "Encryption Service" as encryption
+participant "Duplicate Transaction Detection" as duplicate_detection
 box end
 
 group /create_order
@@ -44,6 +45,7 @@ else Cache miss
     payment --> billing--: get payment object (encrypted)
     billing -> encryption: Decrypt payment object
     billing -> db: Save transaction object with pending status (encrypted)
+    billing -> duplicate_detection: Check for duplicate transactions
     billing -> cache: Save link to cache (encrypted)
     billing -> logging: Log cache miss and payment creation (mask sensitive data)
     billing -> monitoring: Track payment creation time
@@ -76,6 +78,7 @@ auth --> billing--: OK
 billing -> db: create refund transaction in db with pending status (encrypted)
 billing -> payment: request to create refund (over HTTPS)
 billing -> logging: Log refund creation (mask sensitive data)
+billing -> duplicate_detection: Ensure no duplicate refunds
 billing --> frontend--: OK
 end
 
@@ -111,5 +114,6 @@ end
 group Error Handling
 billing -> monitoring: Track errors and timeouts
 billing -> logging: Log error details (mask sensitive data)
+billing -> duplicate_detection: Handle duplicate transactions
 end
 @enduml
