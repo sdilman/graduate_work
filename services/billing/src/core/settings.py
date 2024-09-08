@@ -57,10 +57,13 @@ class BackoffSettings(DefaultSettings):  # TODO: move to .env, do not use defaul
     model_config = SettingsConfigDict(env_prefix="BACKOFF_")
 
 
-class RedisSettings(DefaultSettings):  # TODO: move to .env, do not use defaults in code
-    host: str = Field("127.0.0.1")
-    port: int = Field(6380)
-    dsn: str = Field("")
+class RedisSettings(DefaultSettings):
+    host: str = Field(...)
+    port: int = Field(...)
+    dsn: str = Field(...)
+    backoff_max_time: int = Field(...)
+    backoff_max_tries: int = Field(...)
+    record_expiration_time: int = Field(...)
 
     model_config = SettingsConfigDict(env_prefix="REDIS_")
 

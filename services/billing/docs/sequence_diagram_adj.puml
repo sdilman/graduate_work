@@ -40,6 +40,7 @@ alt Cache hit
     billing -> encryption: Decrypt link
     billing -> logging: Log cache hit (mask sensitive data)
     billing --> frontend: return /link to payment
+    billing --> cache: update expiration of /link
 else Cache miss
     billing -> payment++: Create payment (over HTTPS)
     payment --> billing--: get payment object (encrypted)
@@ -49,7 +50,8 @@ else Cache miss
     billing -> cache: Save link to cache (encrypted)
     billing -> logging: Log cache miss and payment creation (mask sensitive data)
     billing -> monitoring: Track payment creation time
-    billing --> frontend--: return /link to payment
+    billing --> frontend: return /link to payment
+    billing --> cache--: update expiration of /link
 end
 end
 
