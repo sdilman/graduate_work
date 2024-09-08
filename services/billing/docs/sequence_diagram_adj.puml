@@ -50,8 +50,7 @@ else Cache miss
     billing -> cache: Save link to cache (encrypted)
     billing -> logging: Log cache miss and payment creation (mask sensitive data)
     billing -> monitoring: Track payment creation time
-    billing --> frontend: return /link to payment
-    billing --> cache--: update expiration of /link
+    billing --> frontend--: return /link to payment
 end
 end
 

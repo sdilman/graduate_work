@@ -34,7 +34,7 @@ async def create_payment_link(
 
     try:
         cache_key = await redis.get_cache_key(order_id=order_id)
-        cached_value: str = await redis.get_value_by_key(key=cache_key)
+        cached_value: str | None = await redis.get_value_by_key(key=cache_key)
         if cached_value:
             await redis.refresh_payment_link(key=cache_key)
             return cached_value
