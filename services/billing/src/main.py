@@ -7,8 +7,7 @@ from api import router as router_api
 from core.exceptions import register_exception_handlers
 from core.logger import setup_logging
 from core.settings import settings
-
-# TODO: from helpers.lifespan import lifespan
+from helpers.lifespan import lifespan
 from helpers.middleware import BaseMiddleware
 
 setup_logging()
@@ -20,7 +19,7 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
     docs_url=settings.api.docs_url,
     openapi_url=settings.api.openapi_url,
-    # TODO: lifespan=lifespan,
+    lifespan=lifespan,
 )
 
 app.add_middleware(BaseMiddleware)

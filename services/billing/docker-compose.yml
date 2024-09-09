@@ -18,6 +18,12 @@ services:
     expose:
     - ${APP_PORT}
 
+  billing_app_redis:
+    <<: *default
+    image: redis:7.2.4
+    expose:
+    - ${REDIS_PORT}
+
   billing_app_postgres:
     <<: *default
     image: postgres:15

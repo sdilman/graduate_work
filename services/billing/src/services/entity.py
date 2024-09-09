@@ -3,6 +3,7 @@ from __future__ import annotations
 from functools import lru_cache
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql import select
 
 from models.pg import Order, OrderProduct, Product
 from schemas.entity import OrderSchema, ProductSchema
@@ -37,6 +38,10 @@ class EntityService:
         await db.commit()
 
         return new_order.id
+
+    async def get_order(self, db: AsyncSession, order_id: str) -> OrderSchema:
+        result = await db.execute(select(Order).where(Order.id == order_id))
+        return result.scalar_one_or_none()
 
 
 @lru_cache
