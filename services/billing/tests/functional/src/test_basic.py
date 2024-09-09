@@ -18,6 +18,6 @@ async def test_dummy_async(fixture_dummy_async) -> None:  # type: ignore  # noqa
 
 
 def test_health_check(client) -> None:  # type: ignore  # noqa: PGH003
-    response = client.get("/billing/api/v1/healthcheck/check")
+    response = client.get("/billing/api/v1/check")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}

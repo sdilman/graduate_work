@@ -15,6 +15,12 @@ services:
     ports:
     - ${POSTGRES_PORT}:${POSTGRES_PORT}
 
+  billing_app_redis:
+    <<: *default
+    image: redis:7.2.4
+    expose:
+    - ${REDIS_PORT}
+
   app:
     <<: *default
     build:

@@ -13,7 +13,7 @@ class DefaultSettings(BaseSettings):
 
 class AppSettings(DefaultSettings):
     base_url: str = "http://app:8075"
-    health_check_path: str = "/billing/api/v1/healthcheck/check"
+    health_check_path: str = "/billing/api/v1/check"
 
 
 class BackoffSettings(DefaultSettings):
