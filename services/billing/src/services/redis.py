@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Annotated
 
 from functools import lru_cache
@@ -49,7 +47,7 @@ class RedisService:
         await self.redis.expire(name=key, time=expire_time_sec)
 
     @backoff.on_exception(**BACKOFF_SETTINGS)
-    async def get_value_by_key(self, key: str) -> str | None:
+    async def get_value_by_key(self, key: str) -> str | None:  # noqa: FA102
         value = await self.redis.get(name=key)
         if value:
             return str(value)
