@@ -7,6 +7,12 @@ define temp_compose_up
 	docker compose -f $(TEST-COMPOSE-FILE) up --build
 endef
 
+define temp_interg_compose_up
+	printf "include:\n- docker/docker-compose.yml\n-$(1)\n-$(2)" > $(TEST-COMPOSE-FILE) && \
+	docker compose -f $(TEST-COMPOSE-FILE) up --build
+endef
+
+
 .PHONY: env
 env:
 	@find services -name ".env.example" | while read file; do \
@@ -35,7 +41,7 @@ up_bill_test_func: env
 
 .PHONY: up_bill_test_integr
 up_bill_test_integr: env
-	$(call temp_compose_up, services/billing/tests/integration/docker-compose.yml)
+	$(call temp_interg_compose_up, services/billing/tests/integration/docker-compose.yml, services/auth/docker-compose.yml)
 
 .PHONY: down
 down:

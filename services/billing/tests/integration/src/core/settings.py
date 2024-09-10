@@ -13,7 +13,18 @@ class DefaultSettings(BaseSettings):
 
 class AppSettings(DefaultSettings):
     base_url: str = "http://app:8075"
-    health_check_path: str = "/billing/api/v1/healthcheck/check"
+    health_check_path: str = "/billing/api/v1/check"
+    create_product_path: str = "/billing/api/v1/create_product"
+    create_order_path: str = "/billing/api/v1/create_order"
+    create_payment_link_path: str = "/billing/api/v1/payment_create/{order_id}"
+
+
+class AuthSettings(DefaultSettings):
+    base_url: str = "http://auth_app_backend:8001"
+    health_check_path: str = "/auth/api/v1/check"
+    register_user_path: str = "/auth/api/v1/register"
+    login_user_path: str = "/auth/api/v1/login"
+    access_name: str = "auth-app-access-key"
 
 
 class BackoffSettings(DefaultSettings):
@@ -25,6 +36,7 @@ class BackoffSettings(DefaultSettings):
 
 class Settings:
     app: AppSettings = AppSettings()
+    auth: AuthSettings = AuthSettings()
     backoff: BackoffSettings = BackoffSettings()
 
 

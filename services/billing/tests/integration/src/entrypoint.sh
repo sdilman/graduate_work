@@ -8,4 +8,4 @@ W_PID=$!
 
 wait $W_PID
 
-pytest
+pytest -vv

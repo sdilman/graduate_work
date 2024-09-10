@@ -7,11 +7,17 @@ x-default: &default
       condition: service_completed_successfully
 
 services:
-  tests_billing_app_backend:
+  billing_app_backend:
     <<: *default
     build:
       context: ../../
       dockerfile: tests/functional/Dockerfile
+
+  billing_app_redis:
+    <<: *default
+    image: redis:7.2.4
+    expose:
+    - ${REDIS_PORT}
 
   billing_app_postgres:
     <<: *default
