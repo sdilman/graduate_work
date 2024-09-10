@@ -35,6 +35,15 @@ class AppConnectionChecker(InterfaceCheckConnection):
             return response.status_code == 200
 
 
+class AuthConnectionChecker(InterfaceCheckConnection):
+    exceptions = (httpx.ConnectError,)
+
+    async def check_connection(self) -> bool:
+        async with httpx.AsyncClient() as session:
+            response = await session.get(config.auth.base_url + config.auth.health_check_path)
+            return response.status_code == 200
+
+
 class ServiceWaiter:
     __slots__ = ("checker",)
 
@@ -61,7 +70,7 @@ class ServiceWaiter:
 
 
 async def main() -> None:
-    services = [ServiceWaiter(AppConnectionChecker())]
+    services = [ServiceWaiter(AppConnectionChecker()), ServiceWaiter(AuthConnectionChecker())]
 
     await asyncio.gather(*(service.wait_for_service() for service in services))
     logger.info("All services are ready. Starting the application.")

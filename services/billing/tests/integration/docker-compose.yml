@@ -14,25 +14,38 @@ services:
     - ${POSTGRES_PORT}
     ports:
     - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    networks:
+    - graduate-work
 
   billing_app_redis:
     <<: *default
     image: redis:7.2.4
     expose:
     - ${REDIS_PORT}
+    networks:
+    - graduate-work
 
   app:
     <<: *default
     build:
       context: ../../
       dockerfile: Dockerfile
+    networks:
+    - graduate-work
     expose:
     - ${APP_PORT}
 
   tests:
     <<: *default
+    restart: no
     build:
       context: ../../
       dockerfile: tests/integration/Dockerfile
+    networks:
+    - graduate-work
     depends_on:
     - app
+
+networks:
+  graduate-work:
+    name: graduate-work
