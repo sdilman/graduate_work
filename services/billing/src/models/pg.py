@@ -25,7 +25,7 @@ class UUIDMixin(BaseMixin):
 class DatesMixin(BaseMixin):
     """Add timestamp fields to the model."""
 
-    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.UTC), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(), nullable=False)
     updated_at = Column(DateTime)
     closed_at = Column(DateTime)
 
