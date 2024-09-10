@@ -5,8 +5,8 @@ from functools import lru_cache
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import select
 
-from models.pg import Order, OrderProduct, Product
-from schemas.entity import OrderSchema, ProductSchema
+from models.pg import Order, OrderProduct, Product, Transaction
+from schemas.entity import OrderSchema, ProductSchema, TransactionSchema
 
 
 class EntityService:
@@ -42,6 +42,15 @@ class EntityService:
     async def get_order(self, db: AsyncSession, order_id: str) -> OrderSchema:
         result = await db.execute(select(Order).where(Order.id == order_id))
         return result.scalar_one_or_none()
+
+    async def create_transaction(self, db: AsyncSession, transaction_schema: TransactionSchema) -> str:
+        import logging
+
+        logging.warning(transaction_schema.model_dump(exclude_unset=True))
+        new_transaction = Transaction(**transaction_schema.model_dump(exclude_unset=True))
+        db.add(new_transaction)
+        await db.commit()
+        return str(new_transaction.id)
 
 
 @lru_cache

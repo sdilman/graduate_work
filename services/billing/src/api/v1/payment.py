@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.postgres import get_pg_session
 from schemas.cookie import AccessTokenCookie
+from schemas.entity import TransactionSchema, TransactionStatusSchema, TransactionTypeSchema
 from services.authentication import AuthService, get_auth_service
 from services.entity import EntityService, get_entity_service
 from services.payment import PaymentService, get_payment_service
@@ -25,7 +26,7 @@ async def create_payment_link(
     redis: Annotated[RedisService, Depends(get_redis_service)],
     db: Annotated[AsyncSession, Depends(get_pg_session)],
     input_token: str = Cookie(alias=AccessTokenCookie.name),
-) -> str:
+) -> tuple[str, str]:
     user_external = await auth_service.authenticate_user(input_token)
     # TODO: проверка ID юзера
     order = await entity_service.get_order(db, order_id)
@@ -33,20 +34,34 @@ async def create_payment_link(
         raise HTTPException(status_code=500, detail=f"Order with id={order_id} not found")
 
     try:
+        link: str
         cache_key = await redis.get_cache_key(order_id=order_id)
-        cached_value: str | None = await redis.get_value_by_key(key=cache_key)
-        if cached_value:
+        cached_link = await redis.get_value_by_key(key=cache_key)
+        if cached_link:
             await redis.refresh_payment_link(key=cache_key)
-            return cached_value
+            link = cached_link
+        else:
+            link = await payment.create_payment_link(
+                base_url=request.base_url,
+                amount=order.total_amount,
+                currency=order.currency.value.upper(),
+                description="",
+            )
+            await redis.save_payment_link(order_id=order_id, payment_link=link)
 
-        link: str = await payment.create_payment_link(
-            base_url=request.base_url, amount=order.total_amount, currency=order.currency.value.upper(), description=""
+        ts = TransactionSchema(
+            order_id=order_id,
+            type=TransactionTypeSchema.PAYMENT,
+            status=TransactionStatusSchema.PENDING,
+            amount=order.total_amount,
+            currency=order.currency,
         )
-        await redis.save_payment_link(order_id=order_id, payment_link=link)
+        transaction_id: str = await entity_service.create_transaction(db, ts)
+
     except Exception as e:
         raise HTTPException(status_code=500) from e
     else:
-        return link
+        return link, transaction_id
 
 
 @router.get("/payment_create_callback")
