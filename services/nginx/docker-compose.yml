@@ -1,0 +1,27 @@
+x-default: &default
+  restart: unless-stopped
+  networks:
+  - graduate-work
+  depends_on:
+    python_base:
+      condition: service_completed_successfully
+    auth_app_backend:
+      condition: service_started
+    billing_app_backend:
+      condition: service_started
+
+
+services:
+  nginx:
+    <<: *default
+    image: nginx:1.19.2
+    volumes:
+    - ./configs/nginx.conf:/etc/nginx/nginx.conf:ro
+    - ./configs/config:/etc/nginx/conf.d:ro
+    ports:
+    - 80:80
+
+
+networks:
+  graduate-work:
+    name: graduate-work
