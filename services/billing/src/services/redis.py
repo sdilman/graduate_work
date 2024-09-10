@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Annotated, Any, Awaitable, Callable, TypeAlias, cast
 
 from functools import lru_cache
@@ -55,7 +57,7 @@ class RedisService:
         await self.redis.expire(name=key, time=expire_time_sec)
 
     @redis_backoff_decorator()
-    async def get_value_by_key(self, key: str) -> str | None:  # noqa: FA102
+    async def get_value_by_key(self, key: str) -> str | None:
         value = await self.redis.get(name=key)
         if value:
             return str(value)
