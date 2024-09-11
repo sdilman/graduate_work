@@ -52,13 +52,25 @@ def test_payment() -> None:
     order_id = str(response.json())
 
     # Payment
-    payment_url_maks = settings.app.base_url + settings.app.create_payment_link_path
-    payment_url = payment_url_maks.format(order_id=order_id)
+    payment_url_mask = settings.app.base_url + settings.app.create_payment_link_path
+    payment_url = payment_url_mask.format(order_id=order_id)
     payment_data = {}
     try:
         response = requests.post(
             url=payment_url, json=payment_data, cookies={settings.auth.access_name: auth_token_value}
         )
+        response.raise_for_status()
+        assert response.status_code == 200
+    except requests.exceptions.RequestException as e:
+        logger.error("Request failed: %s", traceback.format_exc())
+        raise
+
+
+def test_payment_callback() -> None:
+    # Payment callback
+    payment_callback_url = settings.app.base_url + settings.app.payment_callback_path
+    try:
+        response = requests.get(url=payment_callback_url)
         response.raise_for_status()
         assert response.status_code == 200
     except requests.exceptions.RequestException as e:

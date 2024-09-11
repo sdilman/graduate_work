@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 
+from datetime import datetime
 from functools import lru_cache
 from logging import getLogger
 from urllib.parse import urljoin
@@ -11,6 +12,8 @@ import httpretty
 from yookassa import Configuration, Payment
 
 from core.settings import settings
+from schemas.message import PaymentResult
+from services.message import MessageService
 
 logger = getLogger(__name__)
 Configuration.account_id = settings.payment.account_id
@@ -51,8 +54,15 @@ class PaymentService:
             logger.info("HTTP Request Headers: %s", request.headers)
             logger.info("HTTP Request Body: %s", request.body)
 
-    async def process_payment_callback(self) -> None:
-        raise NotImplementedError
+    async def process_payment_callback(self, message_service: MessageService) -> None:
+        try:
+            await message_service.send_message(
+                topic_name=settings.kafka.topic_name,
+                message_model=PaymentResult(message="TODO", created_at=datetime.now()),
+            )
+        except Exception as e:  # TODO:
+            logger.exception(msg=str(e))
+            raise
 
 
 @lru_cache
