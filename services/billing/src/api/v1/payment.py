@@ -10,6 +10,7 @@ from schemas.cookie import AccessTokenCookie
 from schemas.entity import TransactionSchema, TransactionStatusSchema, TransactionTypeSchema
 from services.authentication import AuthService, get_auth_service
 from services.entity import EntityService, get_entity_service
+from services.message import MessageService, get_message_service
 from services.payment import PaymentService, get_payment_service
 from services.redis import RedisService, get_redis_service
 
@@ -65,6 +66,8 @@ async def create_payment_link(
 
 
 @router.get("/payment_create_callback")
-async def payment_callback() -> str:
-    return "callback OK"
-    # TODO:
+async def payment_callback(
+    payment: Annotated[PaymentService, Depends(get_payment_service)],
+    message: Annotated[MessageService, Depends(get_message_service)],
+) -> None:
+    await payment.process_payment_callback(message)

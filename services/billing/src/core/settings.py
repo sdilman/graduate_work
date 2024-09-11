@@ -76,6 +76,16 @@ class PaymentSettings(DefaultSettings):
     model_config = SettingsConfigDict(env_prefix="YOOKASSA_")
 
 
+class KafkaSettings(DefaultSettings):
+    url: str = Field(...)
+    retry_backoff_ms: int = Field(...)
+    topic_name: str = Field(...)
+    num_partitions: int = Field(default=1, description="Number of partitions")
+    replication_factor: int = Field(default=1, description="Replication factor")
+
+    model_config = SettingsConfigDict(env_prefix="KAFKA_")
+
+
 class Settings:
     debug: bool = False
     app: AppSettings = AppSettings()
@@ -85,6 +95,7 @@ class Settings:
     redis: RedisSettings = RedisSettings()
     backoff: BackoffSettings = BackoffSettings()
     payment: PaymentSettings = PaymentSettings()
+    kafka: KafkaSettings = KafkaSettings()
 
 
 settings = Settings()
