@@ -68,7 +68,10 @@ def test_payment() -> None:
 
 def test_payment_callback() -> None:
     # Payment callback
-    payment_callback_url = settings.app.base_url + settings.app.payment_callback_path
+    transaction_id = "00000000-0000-0000-0000-000000000001"
+    payment_callback_url = settings.app.base_url + settings.app.payment_callback_path.format(
+        transaction_id=transaction_id
+    )
     try:
         response = requests.get(url=payment_callback_url)
         response.raise_for_status()

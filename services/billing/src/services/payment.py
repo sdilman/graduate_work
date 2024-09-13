@@ -1,64 +1,54 @@
 from __future__ import annotations
 
-import json
-
+from base64 import b64encode
 from datetime import datetime
 from functools import lru_cache
 from logging import getLogger
 from urllib.parse import urljoin
+from uuid import uuid4
 
-import httpretty
-
-from yookassa import Configuration, Payment
+import httpx
 
 from core.settings import settings
 from schemas.message import PaymentResult
 from services.message import MessageService
 
 logger = getLogger(__name__)
-Configuration.account_id = settings.payment.account_id
-Configuration.secret_key = settings.payment.secret_key
 
 
 class PaymentService:
-    @httpretty.activate
-    async def create_payment_link(self, base_url: str, amount: float, currency: str, description: str) -> str:
-        try:
-            body_data = {"id": settings.payment.account_id, "status": "pending"}
+    async def create_payment_link(
+        self, base_url: str, amount: float, currency: str, description: str, transaction_id: str, idempotence_key: str
+    ) -> str:
+        async with httpx.AsyncClient() as session:
+            idempotence_key = str(uuid4())
+            auth = b64encode(f"{settings.payment.account_id}:{settings.payment.secret_key}".encode()).decode("utf-8")
+            headers = {
+                "Authorization": f"Basic {auth}",
+                "Idempotence-Key": idempotence_key,
+                "Content-Type": "application/json",
+            }
             payment_data = {
                 "amount": {"value": str(amount), "currency": currency},
-                "confirmation": {"type": "redirect", "return_url": urljoin(str(base_url), settings.payment.return_url)},
+                "confirmation": {
+                    "type": "redirect",
+                    "return_url": urljoin(
+                        str(base_url), settings.payment.return_url.format(transaction_id=transaction_id)
+                    ),  # TODO: transaction id and order id
+                },
                 "capture": "true",
                 "description": description,
             }
-
-            httpretty.register_uri(
-                httpretty.POST, "https://api.yookassa.ru/v3/payments", body=json.dumps(body_data, ensure_ascii=False)
-            )
-
             logger.info("Payment data being sent: %s", payment_data)
+            response = await session.post("https://api.yookassa.ru/v3/payments", headers=headers, json=payment_data)
+            response.raise_for_status()
+            return str(response.status_code)
 
-            payment = Payment.create(payment_data)
-        except Exception as e:  # TODO:
-            logger.exception(msg=str(e))
-            raise
-        else:
-            return str(payment.confirmation.confirmation_url)
-        finally:
-            self._log_request()
-
-    def _log_request(self) -> None:
-        requests = httpretty.latest_requests()
-        for request in requests:
-            logger.info("HTTP Request URL: %s", request.path)
-            logger.info("HTTP Request Headers: %s", request.headers)
-            logger.info("HTTP Request Body: %s", request.body)
-
-    async def process_payment_callback(self, message_service: MessageService) -> None:
+    async def process_payment_callback(self, message_service: MessageService, transaction_id: str) -> None:
         try:
             await message_service.send_message(
                 topic_name=settings.kafka.topic_name,
-                message_model=PaymentResult(message="TODO", created_at=datetime.now()),
+                message_model=PaymentResult(message=transaction_id, created_at=datetime.now()),
             )
         except Exception as e:  # TODO:
             logger.exception(msg=str(e))

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Annotated
 
+from uuid import uuid4
+
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -35,6 +37,15 @@ async def create_payment_link(
         raise HTTPException(status_code=500, detail=f"Order with id={order_id} not found")
 
     try:
+        ts = TransactionSchema(
+            order_id=order_id,
+            type=TransactionTypeSchema.PAYMENT,
+            status=TransactionStatusSchema.PENDING,
+            amount=order.total_amount,
+            currency=order.currency,
+        )
+        transaction_id: str = await entity_service.create_transaction(db, ts)
+        idempotence_key: str = str(uuid4())
         link: str
         cache_key = await redis.get_cache_key(order_id=order_id)
         cached_link = await redis.get_value_by_key(key=cache_key)
@@ -47,17 +58,10 @@ async def create_payment_link(
                 amount=order.total_amount,
                 currency=order.currency.value.upper(),
                 description="",
+                transaction_id=transaction_id,
+                idempotence_key=idempotence_key,
             )
             await redis.save_payment_link(order_id=order_id, payment_link=link)
-
-        ts = TransactionSchema(
-            order_id=order_id,
-            type=TransactionTypeSchema.PAYMENT,
-            status=TransactionStatusSchema.PENDING,
-            amount=order.total_amount,
-            currency=order.currency,
-        )
-        transaction_id: str = await entity_service.create_transaction(db, ts)
 
     except Exception as e:
         raise HTTPException(status_code=500) from e
@@ -65,9 +69,10 @@ async def create_payment_link(
         return link, transaction_id
 
 
-@router.get("/payment_create_callback")
+@router.get("/payment_create_callback/{transaction_id}")
 async def payment_callback(
+    transaction_id: str,
     payment: Annotated[PaymentService, Depends(get_payment_service)],
     message: Annotated[MessageService, Depends(get_message_service)],
 ) -> None:
-    await payment.process_payment_callback(message)
+    await payment.process_payment_callback(message, transaction_id)
