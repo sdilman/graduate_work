@@ -17,7 +17,7 @@ class AppSettings(DefaultSettings):
     create_product_path: str = "/billing/api/v1/create_product"
     create_order_path: str = "/billing/api/v1/create_order"
     create_payment_link_path: str = "/billing/api/v1/payment_create/{order_id}"
-    payment_callback_path: str = "/billing/api/v1/payment_create_callback"
+    payment_callback_path: str = "/billing/api/v1/payment_create_callback/{transaction_id}"
 
 
 class AuthSettings(DefaultSettings):
