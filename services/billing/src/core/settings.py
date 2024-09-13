@@ -78,8 +78,10 @@ class PaymentSettings(DefaultSettings):
 
 class KafkaSettings(DefaultSettings):
     url: str = Field(...)
+    group_id: str = Field(default="billing_group_default")
     retry_backoff_ms: int = Field(...)
     topic_name: str = Field(...)
+    test_topic_name: str = Field(default="test_topic")
     num_partitions: int = Field(default=1, description="Number of partitions")
     replication_factor: int = Field(default=1, description="Replication factor")
 

@@ -9,6 +9,9 @@ import backoff
 import redis.asyncio
 import redis.exceptions
 
+from aiokafka import AIOKafkaProducer
+from aiokafka.errors import KafkaError
+
 from core.logger import get_logger
 from core.settings import settings as config
 
@@ -46,6 +49,17 @@ class RedisConnectionChecker(InterfaceCheckConnection):
         return bool(await client.ping())
 
 
+class KafkaConnectionChecker(InterfaceCheckConnection):
+    exceptions = (KafkaError, OSError)
+
+    async def check_connection(self) -> bool:
+        producer = AIOKafkaProducer(bootstrap_servers=config.kafka.url)
+        await producer.start()
+        result = await producer.send_and_wait(config.kafka.test_topic_name, b"ping")
+        await producer.stop()
+        return bool(result)
+
+
 class ServiceWaiter:
     __slots__ = ("checker",)
 
@@ -72,7 +86,7 @@ class ServiceWaiter:
 
 
 async def main() -> None:
-    services = [ServiceWaiter(PostgresConnectionChecker())]
+    services = [ServiceWaiter(PostgresConnectionChecker()), ServiceWaiter(KafkaConnectionChecker())]
 
     await asyncio.gather(*(service.wait_for_service() for service in services))
     logger.info("All services are ready. Starting the application.")
