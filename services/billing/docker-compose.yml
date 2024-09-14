@@ -34,8 +34,42 @@ services:
     volumes:
     - pg_prod_billing_data:/var/lib/postgresql/data
 
+  billing_app_kafka_ui:
+    <<: *default
+    image: provectuslabs/kafka-ui:v0.7.0
+    expose:
+    - 8080
+    ports:
+    - 8080:8080
+
+  billing_app_kafka-0:
+    <<: *default
+    image: ${KAFKA_CLUSTER_IMAGE}
+    expose:
+    - ${KAFKA_NODE_0_PORT}
+    environment:
+    - KAFKA_CFG_NODE_ID=${KAFKA_NODE_0_CFG_NODE_ID}
+    - KAFKA_CFG_LISTENERS=${KAFKA_NODE_0_CFG_LISTENERS}
+    - KAFKA_CFG_ADVERTISED_LISTENERS=${KAFKA_NODE_0_CFG_ADVERTISED_LISTENERS}
+    volumes:
+    - billing_app_kafka_0_data:/bitnami/kafka
+
+  billing_app_kafka-1:
+    <<: *default
+    image: ${KAFKA_CLUSTER_IMAGE}
+    expose:
+    - ${KAFKA_NODE_1_PORT}
+    environment:
+    - KAFKA_CFG_NODE_ID=${KAFKA_NODE_1_CFG_NODE_ID}
+    - KAFKA_CFG_LISTENERS=${KAFKA_NODE_1_CFG_LISTENERS}
+    - KAFKA_CFG_ADVERTISED_LISTENERS=${KAFKA_NODE_1_CFG_ADVERTISED_LISTENERS}
+    volumes:
+    - billing_app_kafka_1_data:/bitnami/kafka
+
 volumes:
   pg_prod_billing_data:
+  billing_app_kafka_0_data:
+  billing_app_kafka_1_data:
 
 networks:
   graduate-work:
