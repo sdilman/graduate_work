@@ -266,6 +266,7 @@ dependencies = [
     { name = "fastapi" },
     { name = "fastapi-pagination" },
     { name = "gunicorn" },
+    { name = "httpretty" },
     { name = "httpx" },
     { name = "orjson" },
     { name = "psycopg2-binary" },
@@ -275,6 +276,7 @@ dependencies = [
     { name = "sqlalchemy" },
     { name = "uvicorn" },
     { name = "uvloop" },
+    { name = "yookassa" },
 ]
 
 [package.optional-dependencies]
@@ -294,6 +296,7 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.112.1" },
     { name = "fastapi-pagination", specifier = ">=0.12.26" },
     { name = "gunicorn", specifier = ">=23.0.0" },
+    { name = "httpretty", specifier = ">=1.1.4" },
     { name = "httpx", specifier = ">=0.27.0" },
     { name = "orjson", specifier = ">=3.10.7" },
     { name = "psycopg2-binary", specifier = ">=2.9.9" },
@@ -306,6 +309,7 @@ requires-dist = [
     { name = "sqlalchemy", specifier = ">=2.0.29" },
     { name = "uvicorn", specifier = ">=0.30.6" },
     { name = "uvloop", specifier = ">=0.20.0" },
+    { name = "yookassa", specifier = ">=3.3.0" },
 ]
 
 [[package]]
@@ -452,6 +456,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/c4/91/e2df406fb4efacdf46871c25cde65d3c6ee5e173b7e5a4547a47bae91920/distlib-0.3.8.tar.gz", hash = "sha256:1530ea13e350031b6312d8580ddb6b27a104275a31106523b8f123787f494f64", size = 609931 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8e/41/9307e4f5f9976bc8b7fea0b66367734e8faf3ec84bc0d412d8cfabbb66cd/distlib-0.3.8-py2.py3-none-any.whl", hash = "sha256:034db59a0b96f8ca18035f36290806a9a6e6bd9d1ff91e45a7f172eb17e51784", size = 468850 },
+]
+
+[[package]]
+name = "distro"
+version = "1.9.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fc/f8/98eea607f65de6527f8a2e8885fc8015d3e6f5775df186e443e0964a11c3/distro-1.9.0.tar.gz", hash = "sha256:2fa77c6fd8940f116ee1d6b94a2f90b13b5ea8d019b98bc8bafdcabcdd9bdbed", size = 60722 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/12/b3/231ffd4ab1fc9d679809f356cebee130ac7daa00d6d6f3206dd4fd137e9e/distro-1.9.0-py3-none-any.whl", hash = "sha256:7bffd925d65168f85027d8da9af6bddab658135b840670a223589bc0c8ef02b2", size = 20277 },
 ]
 
 [[package]]
@@ -642,6 +655,12 @@ wheels = [
 ]
 
 [[package]]
+name = "httpretty"
+version = "1.1.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/6e/19/850b7ed736319d0c4088581f4fc34f707ef14461947284026664641e16d4/httpretty-1.1.4.tar.gz", hash = "sha256:20de0e5dd5a18292d36d928cc3d6e52f8b2ac73daec40d41eb62dee154933b68", size = 442389 }
+
+[[package]]
 name = "httpx"
 version = "0.27.0"
 source = { registry = "https://pypi.org/simple" }
@@ -775,6 +794,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/98/a4/1ab47638b92648243faf97a5aeb6ea83059cc3624972ab6b8d2316078d3f/mypy_extensions-1.0.0.tar.gz", hash = "sha256:75dbf8955dc00442a438fc4d0666508a9a97b6bd41aa2f0ffe9d2f2725af0782", size = 4433 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2a/e2/5d3f6ada4297caebe1a2add3b126fe800c96f56dbe5d1988a2cbe0b267aa/mypy_extensions-1.0.0-py3-none-any.whl", hash = "sha256:4392f6c0eb8a5668a69e23d168ffa70f0be9ccfd32b5cc2d26a34ae5b844552d", size = 4695 },
+]
+
+[[package]]
+name = "netaddr"
+version = "1.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/54/90/188b2a69654f27b221fba92fda7217778208532c962509e959a9cee5229d/netaddr-1.3.0.tar.gz", hash = "sha256:5c3c3d9895b551b763779ba7db7a03487dc1f8e3b385af819af341ae9ef6e48a", size = 2260504 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/12/cc/f4fe2c7ce68b92cbf5b2d379ca366e1edae38cccaad00f69f529b460c3ef/netaddr-1.3.0-py3-none-any.whl", hash = "sha256:c2c6a8ebe5554ce33b7d5b3a306b71bbb373e000bbbf2350dd5213cc56e3dbbe", size = 2262023 },
 ]
 
 [[package]]
@@ -1474,6 +1502,19 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/97/12/a3540b6ad4755bd8344e03a6acf396d2be030e9b96c5c9ba116b4fb7266c/yarl-1.9.6-cp313-cp313-win_amd64.whl", hash = "sha256:e333ed4bbf317a2424d865ec4836d1f3560e7beee8e0fd0ba44110d9e9174d9f", size = 302837 },
     { url = "https://files.pythonhosted.org/packages/2f/89/1fe0e646677bc17bb5d3961b4a42c996f85dc5d6d0ea7fe46cb8c1f1a9f7/yarl-1.9.6-py3-none-any.whl", hash = "sha256:d34a4c6fde4d49aab493214228d0e03f7e5a717f6da4fe65b879a3af3c22ad7b", size = 33448 },
 ]
+
+[[package]]
+name = "yookassa"
+version = "3.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "deprecated" },
+    { name = "distro" },
+    { name = "netaddr" },
+    { name = "requests" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/28/99/288061ff92713ed8dda5fdddd204edb8dfaf78d246d078d86b5ae019f38c/yookassa-3.3.0.tar.gz", hash = "sha256:2075b52404c78636882d5d68eff58545b0cbe17a3c484c068c33970b9eb8d5e8", size = 97658 }
 
 [[package]]
 name = "zipp"

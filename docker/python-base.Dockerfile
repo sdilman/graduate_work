@@ -31,7 +31,7 @@ RUN chmod +x ./useradd.sh
 
 # Install uv
 # https://docs.astral.sh/uv/guides/integration/docker/
-COPY --from=ghcr.io/astral-sh/uv:0.3.3 /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.4.8 /uv /bin/uv
 
 # Initialize
 CMD ["sleep", "1"]
