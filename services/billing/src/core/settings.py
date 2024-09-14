@@ -67,6 +67,7 @@ class BackoffSettings(DefaultSettings):
 class JWTSettings(DefaultSettings):
     """Class to store JWT project settings."""
 
+    permissions_enabled: bool = Field(default=False, description="Enable permissions check in JWT")
     authjwt_algorithm: str = Field(...)
     authjwt_secret_key: str = Field(...)
     authjwt_token_location: set[str] = {"cookies"}
@@ -81,6 +82,9 @@ class JWTSettings(DefaultSettings):
 class KafkaSettings(DefaultSettings):
     """Class to store Kafka project settings."""
 
+    topic_name: str = Field(
+        default="payment_processing_topic", description="backward compatibility with previous version of billing"
+    )
     enable_idempotence: bool = True
     acks: str = "all"
     bootstrap_servers: str = Field(...)
