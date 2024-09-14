@@ -3,3 +3,4 @@ include:
 - services/nginx/docker-compose.yml
 - services/auth/docker-compose.yml
 - services/billing/docker-compose.yml
+- services/ngrok/docker-compose.yml

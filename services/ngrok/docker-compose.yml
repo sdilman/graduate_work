@@ -1,0 +1,24 @@
+x-default:
+  restart: unless-stopped
+  networks:
+  - graduate-work
+  depends_on:
+    python_base:
+      condition: service_completed_successfully
+    auth_app_backend:
+      condition: service_started
+    billing_app_backend:
+      condition: service_started
+    nginx:
+      condition: service_started
+
+services:
+  ngrok:
+    image: ngrok/ngrok:latest
+    command:
+    - http
+    - http://host.docker.internal:80
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    ports:
+    - 4040:4040
