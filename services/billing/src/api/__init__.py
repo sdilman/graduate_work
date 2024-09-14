@@ -1,9 +1,12 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, FastAPI
 
-from api.v1 import auxiliary, healthcheck, order, payment
+from api.v1 import router as v1_router
 
-router = APIRouter()
-router.include_router(healthcheck.router, prefix="/v1", tags=["v1"])
-router.include_router(order.router, prefix="/v1", tags=["v1"])
-router.include_router(auxiliary.router, prefix="/v1", tags=["v1"])
-router.include_router(payment.router, prefix="/v1", tags=["v1"])
+api_router = APIRouter(prefix="/api")
+api_router.include_router(v1_router, prefix="/v1", tags=["v1"])
+
+
+def setup_routers(app: FastAPI) -> None:
+    root_router = APIRouter()
+    root_router.include_router(api_router)
+    app.include_router(root_router)
