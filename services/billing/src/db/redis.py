@@ -23,13 +23,13 @@ class RedisManager:
         """Initialize redis connection."""
         if self.redis is None:
             self.redis = Redis(host=settings.redis.host, port=settings.redis.port)
-            logger.debug("Redis client has been initialized")
+            logger.info("Redis client has been initialized")
 
     async def close(self) -> None:
         """Close redis connection."""
         if self.redis:
             await self.redis.aclose()  # type: ignore[attr-defined]
-            logger.debug("Redis client has been closed")
+            logger.info("Redis client has been closed")
 
     def get_redis(self) -> TRedis:
         """Get redis client."""
