@@ -42,7 +42,8 @@ class PaymentService:
             logger.info("Payment data being sent: %s", payment_data)
             response = await session.post("https://api.yookassa.ru/v3/payments", headers=headers, json=payment_data)
             response.raise_for_status()
-            return str(response.status_code)
+            data = response.json()
+            return str(data["confirmation"]["confirmation_url"])
 
     async def process_payment_callback(self, message_service: MessageService, transaction_id: str) -> None:
         try:
