@@ -7,9 +7,11 @@ from uuid import uuid4
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from core.settings import settings
 from db.postgres import get_pg_session
 from schemas.cookie import AccessTokenCookie
 from schemas.entity import TransactionSchema, TransactionStatusSchema, TransactionTypeSchema
+from schemas.youkassa import YoukassaEventNotification
 from services.authentication import AuthService, get_auth_service
 from services.entity import EntityService, get_entity_service
 from services.message import MessageService, get_message_service
@@ -76,3 +78,11 @@ async def payment_callback(
     message: Annotated[MessageService, Depends(get_message_service)],
 ) -> None:
     await payment.process_payment_callback(message, transaction_id)
+
+
+@router.post("/results_callback")
+async def results_callback(
+    event_notification: YoukassaEventNotification,
+    message_service: Annotated[MessageService, Depends(get_message_service)],
+) -> None:
+    await message_service.send_message(topic_name=settings.kafka.topic_name, message_model=event_notification)
