@@ -1,3 +1,10 @@
+from __future__ import annotations
+
+import hashlib
+import time
+
+from pathlib import Path
+
 from dotenv import find_dotenv, load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -50,11 +57,43 @@ class Auth(DefaultSettings):
     model_config = SettingsConfigDict(env_prefix="AUTH_")
 
 
-class BackoffSettings(DefaultSettings):  # TODO: move to .env, do not use defaults in code
-    max_tries: int = Field(default=10)
-    max_time: int = Field(default=60)
+class BackoffSettings(DefaultSettings):
+    max_tries: int = Field(...)
+    max_time: int = Field(...)
 
     model_config = SettingsConfigDict(env_prefix="BACKOFF_")
+
+
+class JWTSettings(DefaultSettings):
+    """Class to store JWT project settings."""
+
+    authjwt_algorithm: str = Field(...)
+    authjwt_secret_key: str = Field(...)
+    authjwt_token_location: set[str] = {"cookies"}
+    authjwt_cookie_csrf_protect: bool = False
+    authjwt_access_token_expires: int = Field(...)
+    authjwt_access_cookie_key: str = Field(...)
+    authjwt_refresh_cookie_key: str = Field(...)
+
+    model_config = SettingsConfigDict(env_prefix="JWT_")
+
+
+class KafkaSettings(DefaultSettings):
+    """Class to store Kafka project settings."""
+
+    enable_idempotence: bool = True
+    acks: str = "all"
+    bootstrap_servers: str = Field(...)
+    group_id: str = Field(...)
+    retry_backoff_ms: int = 180
+    config_path: Path = Path(__file__).resolve().parent.parent / "broker" / "topics" / "config.json"
+
+    model_config = SettingsConfigDict(env_prefix="KAFKA_")
+
+    def generate_transaction_id(self) -> str:
+        """Generate unique transaction id."""
+        unique_string = f"{self.bootstrap_servers}{time.time()}"
+        return hashlib.sha256(unique_string.encode("utf-8")).hexdigest()
 
 
 class RedisSettings(DefaultSettings):
@@ -76,16 +115,6 @@ class PaymentSettings(DefaultSettings):
     model_config = SettingsConfigDict(env_prefix="YOOKASSA_")
 
 
-class KafkaSettings(DefaultSettings):
-    url: str = Field(...)
-    retry_backoff_ms: int = Field(...)
-    topic_name: str = Field(...)
-    num_partitions: int = Field(default=1, description="Number of partitions")
-    replication_factor: int = Field(default=1, description="Replication factor")
-
-    model_config = SettingsConfigDict(env_prefix="KAFKA_")
-
-
 class Settings:
     debug: bool = False
     app: AppSettings = AppSettings()
@@ -95,7 +124,13 @@ class Settings:
     redis: RedisSettings = RedisSettings()
     backoff: BackoffSettings = BackoffSettings()
     payment: PaymentSettings = PaymentSettings()
+    jwt: JWTSettings = JWTSettings()
     kafka: KafkaSettings = KafkaSettings()
 
 
 settings = Settings()
+
+
+def get_settings() -> Settings:
+    """Provide settings."""
+    return settings

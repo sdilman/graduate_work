@@ -3,15 +3,14 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
-from api import router as router_api
+from api import setup_routers
 from core.exceptions import register_exception_handlers
 from core.logger import setup_logging
 from core.settings import settings
 from helpers.lifespan import lifespan
-from helpers.middleware import BaseMiddleware
+from helpers.middleware import setup_middleware
 
 setup_logging()
-
 
 app = FastAPI(
     root_path=settings.app.root_path,
@@ -22,9 +21,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.add_middleware(BaseMiddleware)
+setup_middleware(app=app)
 register_exception_handlers(app=app)
-app.include_router(router_api, prefix="/api")
+setup_routers(app=app)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host=settings.app.host, port=settings.app.port)
