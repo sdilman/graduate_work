@@ -1,17 +1,13 @@
 from __future__ import annotations
 
-from typing import Annotated, Any, Awaitable, Callable, TypeAlias, cast
-
-from functools import lru_cache
+from typing import Any, Awaitable, Callable, TypeAlias, cast
 
 import backoff
 
-from fastapi import Depends
 from redis.asyncio import Redis
 from redis.exceptions import ConnectionError, ResponseError, TimeoutError
 
 from core.settings import settings
-from db import get_redis
 
 TDecorator: TypeAlias = Callable[[Callable[..., Awaitable[Any]]], Callable[..., Awaitable[Any]]]
 TRedis: TypeAlias = "Redis[bytes]"
@@ -62,8 +58,3 @@ class RedisService:
         if value:
             return str(value)
         return None
-
-
-@lru_cache
-def get_redis_service(redis: Annotated[TRedis, Depends(get_redis)]) -> RedisService:
-    return RedisService(redis)
