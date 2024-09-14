@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Annotated
 
 from functools import lru_cache
@@ -10,7 +8,13 @@ from broker.kafka_admin import KafkaAdminManager, initialize_kafka_topics
 from broker.kafka_producer import KafkaMessageSender, KafkaTransactionManager
 from core.settings import KafkaSettings, get_settings
 
-__all__ = ["initialize_kafka_topics", "KafkaAdminManager", "KafkaTransactionManager", "KafkaMessageSender"]
+__all__ = [
+    "initialize_kafka_topics",
+    "KafkaAdminManager",
+    "KafkaTransactionManager",
+    "KafkaMessageSender",
+    "get_kafka_sender",
+]
 
 
 @lru_cache
