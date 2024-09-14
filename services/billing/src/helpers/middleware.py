@@ -67,11 +67,12 @@ class PermissionMiddleware(BaseHTTPMiddleware):
                         status_code=status.HTTP_401_UNAUTHORIZED, content={"detail": "Invalid credentials."}
                     )
 
-                current_user_permissions = current_user.get("permissions", [])
-                if not self.permission_checker.has_permission(current_user_permissions, path):
-                    return JSONResponse(
-                        status_code=status.HTTP_403_FORBIDDEN, content={"detail": "Insufficient rights."}
-                    )
+                if config.jwt.permissions_enabled:
+                    current_user_permissions = current_user.get("permissions", [])
+                    if not self.permission_checker.has_permission(current_user_permissions, path):
+                        return JSONResponse(
+                            status_code=status.HTTP_403_FORBIDDEN, content={"detail": "Insufficient rights."}
+                        )
 
                 request.state.user_id = current_user.get("user_id")
 
