@@ -2,25 +2,38 @@ from __future__ import annotations
 
 from typing import cast
 
-from functools import lru_cache
+import itertools
 
+from fastapi import HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
 from core.logger import get_logger
+from interfaces.repositories import RedisRepositoryProtocol
 from models.pg import Order, OrderProduct, Product
+from schemas.cache import CacheReadDto, CacheSetDto
 from schemas.entity import OrderSchema
 
 logger = get_logger(__name__)
 
 
-class OrderServiceError(Exception):
-    pass
-
-
 class OrderService:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, redis_repo: RedisRepositoryProtocol):
         self._db = db
+        self._repo = redis_repo
+
+    async def _check_idempotency_key(self, order_schema: OrderSchema) -> None:
+        result = self._repo.read(CacheReadDto(key=order_schema.idempotency_key))
+        if not result:
+            raise HTTPException(
+                detail="Duplicate request: idempotency key already used.", status_code=status.HTTP_409_CONFLICT
+            )
+
+    async def _store_argument_pairs_in_cache(self, *args: str) -> None:
+        pairs = itertools.combinations(args, 2)
+        for name, value in pairs:
+            await self._repo.create(CacheSetDto(key=name, value=value))
 
     async def _get_nonexists_products(self, order_schema: OrderSchema) -> set[str]:
         products_stmt = select(Product).where(Product.id.in_(order_schema.products_id))
@@ -48,10 +61,13 @@ class OrderService:
 
     # TODO: add transaction
     async def create_order(self, order_schema: OrderSchema) -> Order:
+        await self._check_idempotency_key(order_schema)
+
         non_existing_products_ids = await self._get_nonexists_products(order_schema)
 
         if non_existing_products_ids:
-            raise OrderServiceError("Products does not exist: %s", non_existing_products_ids)
+            detail = f"Products do not exist: {non_existing_products_ids}"
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
 
         total_price = await self._calculate_total_order_price(order_schema)
 
@@ -69,13 +85,10 @@ class OrderService:
         self._db.add_all(order_products)
         await self._db.commit()
 
+        await self._store_argument_pairs_in_cache(order_schema.idempotency_key, new_order.id)
+
         return new_order
 
     async def get_order(self, order_id: str) -> OrderSchema:
         result = await self._db.execute(select(Order).where(Order.id == order_id))
         return result.scalar_one_or_none()
-
-
-@lru_cache
-def get_order_service(db: AsyncSession) -> OrderService:
-    return OrderService(db)
