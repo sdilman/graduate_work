@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import cast
 
 from base64 import b64encode
-from functools import lru_cache
 from logging import getLogger
 from urllib.parse import urljoin
 from uuid import uuid4
@@ -31,7 +30,7 @@ class PaymentService:
 
     async def create_payment_link(
         self, base_url: str, amount: float, currency: str, description: str, transaction_id: str
-    ) -> str:
+    ) -> tuple[str, str]:
         async with httpx.AsyncClient() as session:
             headers = self.get_headers()
             payment_data = {
@@ -50,7 +49,7 @@ class PaymentService:
             response = await session.post("https://api.yookassa.ru/v3/payments", headers=headers, json=payment_data)
             response.raise_for_status()
             data = response.json()
-            return str(data["confirmation"]["confirmation_url"])
+            return str(data["confirmation"]["confirmation_url"]), str(data["id"])
 
     async def create_refund_object(self, payment_id: str, amount: float, currency: str) -> str:
         async with httpx.AsyncClient() as session:
@@ -71,8 +70,3 @@ class PaymentService:
         except Exception as e:  # TODO:
             logger.exception(msg=str(e))
             raise
-
-
-@lru_cache
-def get_payment_service() -> PaymentService:
-    return PaymentService()

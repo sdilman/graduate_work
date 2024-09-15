@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from typing import cast
 
-from functools import lru_cache
-
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.constraints import TransactionStatus, TransactionType
 from core.logger import get_logger
 from models.pg import Order, OrderProduct, Product, Transaction
+from repositories import RedisService
 from schemas.entity import OrderSchema
 from services.payment import PaymentService
 
@@ -21,9 +20,10 @@ class OrderServiceError(Exception):
 
 
 class OrderService:
-    def __init__(self, db: AsyncSession, payment_service: PaymentService):
+    def __init__(self, db: AsyncSession, payment_service: PaymentService, redis: RedisService):
         self._db = db
         self._payment_service = payment_service
+        self._redis = redis
 
     async def _get_nonexists_products(self, order_schema: OrderSchema) -> set[str]:
         products_stmt = select(Product).where(Product.id.in_(order_schema.products_id))
@@ -79,6 +79,49 @@ class OrderService:
         return result.scalar_one_or_none()
 
     # TODO: add transaction rollback
+    async def get_payment_link_for_order(self, order_id: str, base_url: str) -> str:
+        cache_key = await self._redis.get_cache_key(order_id=order_id)
+        cached_link = await self._redis.get_value_by_key(key=cache_key)
+        if cached_link:
+            return cast(str, cached_link)
+
+        order = await self.get_order(order_id)
+
+        succeeded_transactions_exists = await self._db.execute(
+            select(func.count()).where(
+                and_(Transaction.status == TransactionStatus.SUCCEEDED, Transaction.order_id == order.id)
+            )
+        )
+        succeeded_transactions_exists = succeeded_transactions_exists.scalar()
+        if succeeded_transactions_exists:
+            return ""
+
+        transaction = Transaction(
+            order_id=order_id,
+            type=TransactionType.PAYMENT,
+            status=TransactionStatus.PENDING,
+            amount=order.total_amount,
+            currency=order.currency,
+        )
+        self._db.add(transaction)
+        await self._db.commit()
+
+        link, external_id = await self._payment_service.create_payment_link(
+            base_url=base_url,
+            amount=order.total_amount,
+            currency=order.currency.value.upper(),
+            description=f"Payment for order № {order_id}",
+            transaction_id=transaction.id,
+        )
+        await self._redis.save_payment_link(order_id=order_id, payment_link=link)
+
+        transaction.external_id = external_id
+        self._db.add(transaction)
+        await self._db.commit()
+
+        return cast(str, link)
+
+    # TODO: add transaction rollback
     async def refund_order(self, order_id: str) -> bool:
         order = await self.get_order(order_id)
         if order is None:
@@ -114,9 +157,3 @@ class OrderService:
         await self._db.commit()
 
         return True
-
-
-@lru_cache
-def get_order_service(db: AsyncSession) -> OrderService:
-    payment_service = PaymentService()
-    return OrderService(db, payment_service)
