@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-from mixins import CreatedAtMixin
+from datetime import datetime
+
+from pydantic import BaseModel, Field
 
 
-class PaymentResult(CreatedAtMixin):
+class PaymentResult(BaseModel):
+    created_at: datetime = Field(default_factory=datetime.now)
     message: str

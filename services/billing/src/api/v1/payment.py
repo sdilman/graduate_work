@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from broker import KafkaMessageSender, get_kafka_sender
 from db.postgres import get_pg_session
 from repositories import RedisService, get_redis_service
-from schemas.entity import TransactionSchema, TransactionStatus, TransactionType
+from schemas.entity import TransactionSchema, TransactionStatusSchema, TransactionTypeSchema
 from schemas.youkassa import YoukassaEventNotification
 from services.entity import EntityService, get_entity_service
 from services.order_service import get_order_service
@@ -36,8 +36,8 @@ async def create_payment_link(
     try:
         ts = TransactionSchema(
             order_id=order_id,
-            type=TransactionType.PAYMENT,
-            status=TransactionStatus.PENDING,
+            type=TransactionTypeSchema.PAYMENT,
+            status=TransactionStatusSchema.PENDING,
             amount=order.total_amount,
             currency=order.currency,
         )
