@@ -91,7 +91,7 @@ class KafkaSettings(DefaultSettings):
     acks: str = "all"
     bootstrap_servers: str = Field(...)
     group_id: str = Field(...)
-    retry_backoff_ms: int = 180
+    retry_backoff_ms: int = Field(...)
     config_path: Path = Path(__file__).resolve().parent.parent / "broker" / "topics" / "config.json"
 
     model_config = SettingsConfigDict(env_prefix="KAFKA_")
