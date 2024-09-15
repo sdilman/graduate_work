@@ -32,6 +32,7 @@ class ApiSettings(DefaultSettings):
     docs_url: str = Field(...)
     openapi_url: str = Field(...)
     version: str = Field(...)
+    results_callback_url: str = Field(...)
 
     model_config = SettingsConfigDict(env_prefix="API_")
 

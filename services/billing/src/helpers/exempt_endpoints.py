@@ -11,6 +11,7 @@ class ExemptEndpoints(BaseModel):
     healthcheck: str = "/healthcheck"
     docs: str = config.api.docs_url.split(config.api.version)[-1]
     openai: str = config.api.openapi_url.split(config.api.version)[-1]
+    results_callback: str = config.api.results_callback_url.split(config.api.version)[-1]
 
 
 def get_exempt_endpoints() -> list[str]:
