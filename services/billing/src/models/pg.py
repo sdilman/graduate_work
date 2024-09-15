@@ -94,5 +94,6 @@ class Transaction(UUIDMixin, DatesMixin, Base):
     status = Column(Enum(TransactionStatus), nullable=False)
     amount = Column(Float, nullable=False)
     currency = Column(Enum(Currency), nullable=False)
+    external_id = Column(String, nullable=False, server_default="")
 
     order = relationship("Order", back_populates="transactions")
