@@ -85,7 +85,7 @@ exempt-modules = ["typing", "typing_extensions"]
 quote-annotations = true  # https://docs.astral.sh/ruff/settings/#lint_flake8-type-checking_quote-annotations
 
 [tool.ruff.lint.isort]  # https://docs.astral.sh/ruff/settings/#isort
-known-first-party = ["api", "core", "db", "services", "helpers", "models", "schemas", "broker", "repositories"]
+known-first-party = ["api", "core", "db", "services", "helpers", "models", "schemas", "broker", "repositories", "interfaces"]
 lines-between-types = 1
 section-order = [
   "future",

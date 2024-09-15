@@ -1,45 +1,17 @@
 from __future__ import annotations
 
-from datetime import datetime
-from enum import StrEnum, auto
-from uuid import UUID, uuid4
+from typing import TYPE_CHECKING
 
-from pydantic import BaseModel, Field
+from uuid import UUID  # noqa:TCH003
 
+from core.constraints import Currency, OrderStatus, TransactionStatus, TransactionType
+from schemas.mixins import IdempotencyKeyMixin, TimestampsMixin, UserIdMixin, UUIDMixin
 
-class UUIDMixinSchema(BaseModel):
-    id: UUID = Field(default_factory=uuid4)
-
-
-class DatesMixinSchema(BaseModel):
-    created_at: datetime = Field(default_factory=lambda: datetime.now())
-    updated_at: datetime | None = None
-    closed_at: datetime | None = None
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
-class CurrencySchema(StrEnum):
-    RUB = auto()
-
-
-class OrderStatusSchema(StrEnum):
-    PENDING = auto()
-    PAID = auto()
-    REFUNDING = auto()
-    REFUNDED = auto()
-
-
-class TransactionTypeSchema(StrEnum):
-    PAYMENT = auto()
-    REFUND = auto()
-
-
-class TransactionStatusSchema(StrEnum):
-    PENDING = auto()
-    SUCCEEDED = auto()
-    CANCELLED = auto()
-
-
-class PaymentMethodSchema(UUIDMixinSchema, DatesMixinSchema):
+class PaymentMethodSchema(UUIDMixin, TimestampsMixin):
     user_id: UUID
     payment_token: str
     payment_method: str
@@ -47,22 +19,21 @@ class PaymentMethodSchema(UUIDMixinSchema, DatesMixinSchema):
     is_active: bool = True
 
 
-class ProductSchema(UUIDMixinSchema, DatesMixinSchema):
+class ProductSchema(UUIDMixin, TimestampsMixin):
     title: str
     description: str | None
     basic_price: float
-    basic_currency: CurrencySchema
+    basic_currency: Currency
 
 
-class OrderSchema(UUIDMixinSchema, DatesMixinSchema):
-    user_id: UUID | None = Field(default=None, description="Retrieved from access token")
-    status: OrderStatusSchema = OrderStatusSchema.PENDING
-    currency: CurrencySchema = CurrencySchema.RUB
-    products_id: list[str]
+class OrderSchema(UUIDMixin, TimestampsMixin, UserIdMixin, IdempotencyKeyMixin):
+    status: OrderStatus = OrderStatus.PENDING
+    currency: Currency = Currency.RUB
+    products_id: list[UUID]
     total_amount: float | None = None
 
 
-class UserProductSchema(UUIDMixinSchema, DatesMixinSchema):
+class UserProductSchema(UUIDMixin, TimestampsMixin):
     product_id: str
     user_id: str
     active_from: datetime | None
@@ -70,14 +41,14 @@ class UserProductSchema(UUIDMixinSchema, DatesMixinSchema):
     renewal_enabled: bool = False
 
 
-class OrderProductSchema(UUIDMixinSchema, DatesMixinSchema):
+class OrderProductSchema(UUIDMixin, TimestampsMixin):
     order_id: str
     product_id: str
 
 
-class TransactionSchema(UUIDMixinSchema, DatesMixinSchema):
+class TransactionSchema(UUIDMixin, TimestampsMixin):
     order_id: str
-    type: TransactionTypeSchema
-    status: TransactionStatusSchema
+    type: TransactionType
+    status: TransactionStatus
     amount: float
-    currency: CurrencySchema
+    currency: Currency

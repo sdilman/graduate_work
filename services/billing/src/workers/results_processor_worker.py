@@ -4,10 +4,11 @@ import pydantic
 
 from aiokafka import AIOKafkaConsumer
 
+from core.constraints.yookassa import YoukassaObjectTypes
 from core.logger import get_logger
 from core.settings import settings
 from db.postgres import get_pg_session
-from schemas.youkassa import YoukassaEventNotification, YoukassaObjectTypes, YoukassaPaymentObject
+from schemas.youkassa import YoukassaEventNotification, YoukassaPaymentObject
 from services.payment_processing_service import PaymentResultsProcessingService
 
 logger = get_logger(__name__)

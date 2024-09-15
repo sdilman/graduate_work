@@ -2,27 +2,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from enum import StrEnum, auto
-
 from pydantic import BaseModel
 
-
-class YoukassaObjectTypes(StrEnum):
-    PAYMENT = auto()
-    REFUND = auto()
-
-
-class YoukassaPaymentStatuses(StrEnum):
-    PENDING = auto()
-    WAITING_FOR_CAPTURE = auto()
-    SUCCEEDED = auto()
-    CANCELED = auto()
-
-
-class YoukassaRefundStatuses(StrEnum):
-    PENDING = auto()
-    SUCCEEDED = auto()
-    CANCELED = auto()
+from core.constraints.yookassa import YoukassaPaymentStatuses
 
 
 class PaymentObjectMetadata(BaseModel):

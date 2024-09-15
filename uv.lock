@@ -10,6 +10,7 @@ members = [
     "auth",
     "billing",
     "nginx",
+    "ngrock",
 ]
 requirements = [
     { name = "mypy", specifier = "==1.11.2" },
@@ -848,6 +849,11 @@ wheels = [
 name = "nginx"
 version = "0.1.0"
 source = { virtual = "services/nginx" }
+
+[[package]]
+name = "ngrock"
+version = "0.1.0"
+source = { virtual = "services/ngrok" }
 
 [[package]]
 name = "nodeenv"
