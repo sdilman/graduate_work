@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
 from broker import KafkaMessageSender, get_kafka_sender
 from db.postgres import get_pg_session
@@ -19,7 +20,12 @@ from services.payment import PaymentService, get_payment_service
 router = APIRouter()
 
 
-@router.post("/payment_create/{order_id}")
+@router.post(
+    "/payment_create/{order_id}",
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a payment link",
+    description="Creates a payment link for the specified order.",
+)
 async def create_payment_link(
     order_id: str,
     request: Request,
