@@ -29,7 +29,7 @@ class ProductSchema(UUIDMixin, TimestampsMixin):
 class OrderSchema(UUIDMixin, TimestampsMixin, UserIdMixin, IdempotencyKeyMixin):
     status: OrderStatus = OrderStatus.PENDING
     currency: Currency = Currency.RUB
-    products_id: list[UUID]
+    products_id: list[str]
     total_amount: float | None = None
 
 
