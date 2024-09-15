@@ -26,7 +26,7 @@ class YoukassaRefundStatuses(StrEnum):
 
 
 class PaymentObjectMetadata(BaseModel):
-    transaction_id: str
+    transaction_id: str | None = None
 
 
 class YoukassaPaymentObject(BaseModel):

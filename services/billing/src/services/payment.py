@@ -38,6 +38,7 @@ class PaymentService:
                 },
                 "capture": "true",
                 "description": description,
+                "metadata": {"transaction_id": transaction_id},
             }
             logger.info("Payment data being sent: %s", payment_data)
             response = await session.post("https://api.yookassa.ru/v3/payments", headers=headers, json=payment_data)
