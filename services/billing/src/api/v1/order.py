@@ -18,4 +18,5 @@ async def create_order(
 ) -> Any:
     order_service = get_order_service(db)
     input_order.user_id = request.state.user_id
-    return await order_service.create_order(input_order)
+    order = await order_service.create_order(input_order)
+    return order.id

@@ -47,7 +47,7 @@ class OrderService:
         return order_products
 
     # TODO: add transaction
-    async def create_order(self, order_schema: OrderSchema) -> OrderSchema:
+    async def create_order(self, order_schema: OrderSchema) -> Order:
         non_existing_products_ids = await self._get_nonexists_products(order_schema)
 
         if non_existing_products_ids:
@@ -69,7 +69,7 @@ class OrderService:
         self._db.add_all(order_products)
         await self._db.commit()
 
-        return new_order.id
+        return new_order
 
     async def get_order(self, order_id: str) -> OrderSchema:
         result = await self._db.execute(select(Order).where(Order.id == order_id))

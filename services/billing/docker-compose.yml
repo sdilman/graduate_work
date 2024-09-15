@@ -24,6 +24,12 @@ services:
       context: .
     entrypoint: [./workers_entrypoint.sh, results_processor_worker.py]
 
+  billing_app_renewal_worker:
+    <<: *default
+    build:
+      context: .
+    entrypoint: [./workers_entrypoint.sh, subscription_renewal_worker.py]
+
   billing_app_redis:
     <<: *default
     image: redis:7.2.4
