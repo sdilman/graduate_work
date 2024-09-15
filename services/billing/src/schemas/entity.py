@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mixins import IdempotencyKeyMixin, TimestampsMixin, UserIdMixin, UUIDMixin
+from uuid import UUID  # noqa:TCH003
 
 from core.constraints import Currency, OrderStatus, TransactionStatus, TransactionType
+from schemas.mixins import IdempotencyKeyMixin, TimestampsMixin, UserIdMixin, UUIDMixin
 
 if TYPE_CHECKING:
     from datetime import datetime
-    from uuid import UUID
 
 
 class PaymentMethodSchema(UUIDMixin, TimestampsMixin):
@@ -27,10 +27,10 @@ class ProductSchema(UUIDMixin, TimestampsMixin):
 
 
 class OrderSchema(UUIDMixin, TimestampsMixin, UserIdMixin, IdempotencyKeyMixin):
-    status: OrderStatus
-    currency: Currency
+    status: OrderStatus = OrderStatus.PENDING
+    currency: Currency = Currency.RUB
     products_id: list[UUID]
-    total_amount: float
+    total_amount: float | None = None
 
 
 class UserProductSchema(UUIDMixin, TimestampsMixin):
