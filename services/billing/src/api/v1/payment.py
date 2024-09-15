@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from uuid import uuid4
-
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -42,7 +40,6 @@ async def create_payment_link(
             currency=order.currency,
         )
         transaction_id: str = await entity_service.create_transaction(db, ts)
-        idempotence_key: str = str(uuid4())
         link: str
         cache_key = await redis.get_cache_key(order_id=order_id)
         cached_link = await redis.get_value_by_key(key=cache_key)
@@ -56,7 +53,6 @@ async def create_payment_link(
                 currency=order.currency.value.upper(),
                 description="",
                 transaction_id=transaction_id,
-                idempotence_key=idempotence_key,
             )
             await redis.save_payment_link(order_id=order_id, payment_link=link)
 
