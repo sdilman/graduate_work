@@ -17,16 +17,18 @@ services:
     - ${APP_PORT}:${APP_PORT}
     expose:
     - ${APP_PORT}
-    networks:
-    - graduate-work
+
+  billing_app_results_worker:
+    <<: *default
+    build:
+      context: .
+    entrypoint: [./workers_entrypoint.sh, results_processor_worker.py]
 
   billing_app_redis:
     <<: *default
     image: redis:7.2.4
     expose:
     - ${REDIS_PORT}
-    networks:
-    - graduate-work
 
   billing_app_postgres:
     <<: *default
@@ -37,43 +39,43 @@ services:
     - ${POSTGRES_PORT}:${POSTGRES_PORT}
     volumes:
     - pg_prod_billing_data:/var/lib/postgresql/data
-    networks:
-    - graduate-work
 
   billing_app_kafka_ui:
+    <<: *default
     image: provectuslabs/kafka-ui:v0.7.0
     expose:
-    - '8080'
+    - 8080
     ports:
     - 8080:8080
-    env_file:
-    - .env
-    networks:
-    - graduate-work
 
   billing_app_kafka-0:
-    image: bitnami/kafka:3.4
+    <<: *default
+    image: ${KAFKA_CLUSTER_IMAGE}
     expose:
     - ${KAFKA_NODE_0_PORT}
     environment:
-    - KAFKA_ENABLE_KRAFT=yes
-    - KAFKA_CFG_PROCESS_ROLES=broker,controller
-    - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-    - ALLOW_PLAINTEXT_LISTENER=yes
-    - KAFKA_CFG_NODE_ID=0
-    - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@billing_app_kafka-0:9093
-    - KAFKA_KRAFT_CLUSTER_ID=${KAFKA_KRAFT_CLUSTER_ID}
-    - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
-    - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://billing_app_kafka-0:9092,EXTERNAL://127.0.0.1:9094
-    - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+    - KAFKA_CFG_NODE_ID=${KAFKA_NODE_0_CFG_NODE_ID}
+    - KAFKA_CFG_LISTENERS=${KAFKA_NODE_0_CFG_LISTENERS}
+    - KAFKA_CFG_ADVERTISED_LISTENERS=${KAFKA_NODE_0_CFG_ADVERTISED_LISTENERS}
     volumes:
-    - kafka_0_billing_data:/bitnami/kafka
-    networks:
-    - graduate-work
+    - billing_app_kafka_0_data:/bitnami/kafka
+
+  billing_app_kafka-1:
+    <<: *default
+    image: ${KAFKA_CLUSTER_IMAGE}
+    expose:
+    - ${KAFKA_NODE_1_PORT}
+    environment:
+    - KAFKA_CFG_NODE_ID=${KAFKA_NODE_1_CFG_NODE_ID}
+    - KAFKA_CFG_LISTENERS=${KAFKA_NODE_1_CFG_LISTENERS}
+    - KAFKA_CFG_ADVERTISED_LISTENERS=${KAFKA_NODE_1_CFG_ADVERTISED_LISTENERS}
+    volumes:
+    - billing_app_kafka_1_data:/bitnami/kafka
 
 volumes:
   pg_prod_billing_data:
-  kafka_0_billing_data:
+  billing_app_kafka_0_data:
+  billing_app_kafka_1_data:
 
 networks:
   graduate-work:

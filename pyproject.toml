@@ -69,6 +69,7 @@ ignore = [
   "SIM117",  # allow nested with statements
   "F841",  # allow unused variables
   "BLE001",  # catching blind exception
+  "UP037",  # quoted annotations
 ]
 select = ["ALL"]
 unfixable = [
@@ -81,9 +82,10 @@ ban-relative-imports = "all"
 
 [tool.ruff.lint.flake8-type-checking]
 exempt-modules = ["typing", "typing_extensions"]
+quote-annotations = true  # https://docs.astral.sh/ruff/settings/#lint_flake8-type-checking_quote-annotations
 
 [tool.ruff.lint.isort]  # https://docs.astral.sh/ruff/settings/#isort
-known-first-party = ["api", "core", "db", "services", "helpers", "models", "schemas"]
+known-first-party = ["api", "core", "db", "services", "helpers", "models", "schemas", "broker", "repositories"]
 lines-between-types = 1
 section-order = [
   "future",
@@ -109,6 +111,7 @@ max-complexity = 10
 "__init__.py" = [
   "F401",  # Unused import
   "F403",  # Import star
+  "FA102",  # Missing `from __future__ import annotations` FastAPI dependency injection issue
   "ARG001",  # Unused function argument (using fixtures from other fixtures)
 ]
 
@@ -126,8 +129,8 @@ max-statements = 30
 
 [tool.uv]
 dev-dependencies = [
-  "ruff==0.6.2",
-  "mypy==1.11.1",
+  "ruff==0.6.5",
+  "mypy==1.11.2",
   "pre-commit==3.8.0",
   "pytest>=8.3.2",
   "pytest-asyncio>=0.24.0",

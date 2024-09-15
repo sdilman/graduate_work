@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from base64 import b64encode
-from datetime import datetime
 from functools import lru_cache
 from logging import getLogger
 from urllib.parse import urljoin
@@ -9,9 +8,10 @@ from uuid import uuid4
 
 import httpx
 
+from broker import KafkaMessageSender
 from core.settings import settings
-from schemas.message import PaymentResult
-from services.message import MessageService
+from schemas.broker import MessageIn
+from schemas.youkassa import YoukassaEventNotification
 
 logger = getLogger(__name__)
 
@@ -38,17 +38,22 @@ class PaymentService:
                 },
                 "capture": "true",
                 "description": description,
+                "metadata": {"transaction_id": transaction_id},
             }
             logger.info("Payment data being sent: %s", payment_data)
             response = await session.post("https://api.yookassa.ru/v3/payments", headers=headers, json=payment_data)
             response.raise_for_status()
-            return str(response.status_code)
+            data = response.json()
+            return str(data["confirmation"]["confirmation_url"])
 
-    async def process_payment_callback(self, message_service: MessageService, transaction_id: str) -> None:
+    async def process_payment_result(
+        self, message_service: KafkaMessageSender, event_notification: YoukassaEventNotification
+    ) -> None:
         try:
             await message_service.send_message(
-                topic_name=settings.kafka.topic_name,
-                message_model=PaymentResult(message=transaction_id, created_at=datetime.now()),
+                message=MessageIn(
+                    topic=settings.kafka.topic_name, key="idempotency_key", value=event_notification.model_dump_json()
+                )
             )
         except Exception as e:  # TODO:
             logger.exception(msg=str(e))

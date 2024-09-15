@@ -10,7 +10,7 @@ ARG USERNAME=billing
 COPY ./src ./
 
 # Create non-root user and group
-RUN chmod +x ./entrypoint.sh && \
+RUN chmod +x ./entrypoint.sh ./workers_entrypoint.sh && \
     ./useradd.sh "${GID}" "${UID}" "${USERNAME}" "${BASE_PATH}"
 
 # Switch to non-root user
