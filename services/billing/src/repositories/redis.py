@@ -28,6 +28,10 @@ def redis_backoff_decorator() -> TDecorator:
 
 
 class RedisRepository(RedisRepositoryProtocol):
+    """Implementation of RedisRepositoryProtocol."""
+
+    __slots__ = ("redis",)
+
     def __init__(self, redis: TRedis):
         self.redis = redis
 
