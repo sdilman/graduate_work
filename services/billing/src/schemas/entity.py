@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mixins import IdempotencyKeyMixin, TimestampsMixin, UserIdMixin, UUIDMixin
-
 from core.constraints import Currency, OrderStatus, TransactionStatus, TransactionType
+from schemas.mixins import IdempotencyKeyMixin, TimestampsMixin, UserIdMixin, UUIDMixin
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -27,10 +26,10 @@ class ProductSchema(UUIDMixin, TimestampsMixin):
 
 
 class OrderSchema(UUIDMixin, TimestampsMixin, UserIdMixin, IdempotencyKeyMixin):
-    status: OrderStatus
+    status: OrderStatus = OrderStatus.PENDING
     currency: Currency
     products_id: list[str]
-    total_amount: float | None
+    total_amount: float | None = None
 
 
 class UserProductSchema(UUIDMixin, TimestampsMixin):
