@@ -50,7 +50,9 @@ class PaymentService:
     ) -> None:
         try:
             await message_service.send_message(
-                message=MessageIn(topic=settings.kafka.topic_name, key="idempotency_key", value=event_notification)
+                message=MessageIn(
+                    topic=settings.kafka.topic_name, key="idempotency_key", value=event_notification.model_dump_json()
+                )
             )
         except Exception as e:  # TODO:
             logger.exception(msg=str(e))
