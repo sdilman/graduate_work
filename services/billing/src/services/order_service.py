@@ -4,12 +4,14 @@ from typing import cast
 
 from functools import lru_cache
 
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from core.constraints import TransactionStatus, TransactionType
 from core.logger import get_logger
-from models.pg import Order, OrderProduct, Product
+from models.pg import Order, OrderProduct, Product, Transaction
 from schemas.entity import OrderSchema
+from services.payment import PaymentService
 
 logger = get_logger(__name__)
 
@@ -19,8 +21,9 @@ class OrderServiceError(Exception):
 
 
 class OrderService:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, payment_service: PaymentService):
         self._db = db
+        self._payment_service = payment_service
 
     async def _get_nonexists_products(self, order_schema: OrderSchema) -> set[str]:
         products_stmt = select(Product).where(Product.id.in_(order_schema.products_id))
@@ -71,11 +74,49 @@ class OrderService:
 
         return new_order
 
-    async def get_order(self, order_id: str) -> OrderSchema:
+    async def get_order(self, order_id: str) -> Order:
         result = await self._db.execute(select(Order).where(Order.id == order_id))
         return result.scalar_one_or_none()
+
+    # TODO: add transaction rollback
+    async def refund_order(self, order_id: str) -> bool:
+        order = await self.get_order(order_id)
+        if order is None:
+            return False
+
+        transaction_to_return = await self._db.execute(
+            select(Transaction).where(
+                and_(Transaction.status == TransactionStatus.SUCCEEDED, Transaction.order_id == order.id)
+            )
+        )
+
+        transaction_to_return = transaction_to_return.scalar_one_or_none()
+        logger.info(transaction_to_return.amount)
+
+        if not transaction_to_return:
+            return False
+
+        refund_tr = Transaction(
+            status=TransactionStatus.PENDING,
+            type=TransactionType.REFUND,
+            amount=transaction_to_return.amount,
+            currency=transaction_to_return.currency,
+            order_id=transaction_to_return.order_id,
+        )
+
+        self._db.add(refund_tr)
+        await self._db.commit()
+        external_id = await self._payment_service.create_refund_object(
+            transaction_to_return.external_id, transaction_to_return.amount, transaction_to_return.currency
+        )
+        refund_tr.external_id = external_id
+        self._db.add(refund_tr)
+        await self._db.commit()
+
+        return True
 
 
 @lru_cache
 def get_order_service(db: AsyncSession) -> OrderService:
-    return OrderService(db)
+    payment_service = PaymentService()
+    return OrderService(db, payment_service)

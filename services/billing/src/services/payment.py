@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import cast
+
 from base64 import b64encode
 from functools import lru_cache
 from logging import getLogger
@@ -17,17 +19,21 @@ logger = getLogger(__name__)
 
 
 class PaymentService:
+    @staticmethod
+    def get_headers() -> dict[str, str]:
+        idempotence_key = str(uuid4())
+        auth = b64encode(f"{settings.payment.account_id}:{settings.payment.secret_key}".encode()).decode("utf-8")
+        return {
+            "Authorization": f"Basic {auth}",
+            "Idempotence-Key": idempotence_key,
+            "Content-Type": "application/json",
+        }
+
     async def create_payment_link(
-        self, base_url: str, amount: float, currency: str, description: str, transaction_id: str, idempotence_key: str
+        self, base_url: str, amount: float, currency: str, description: str, transaction_id: str
     ) -> str:
         async with httpx.AsyncClient() as session:
-            idempotence_key = str(uuid4())
-            auth = b64encode(f"{settings.payment.account_id}:{settings.payment.secret_key}".encode()).decode("utf-8")
-            headers = {
-                "Authorization": f"Basic {auth}",
-                "Idempotence-Key": idempotence_key,
-                "Content-Type": "application/json",
-            }
+            headers = self.get_headers()
             payment_data = {
                 "amount": {"value": str(amount), "currency": currency},
                 "confirmation": {
@@ -45,6 +51,13 @@ class PaymentService:
             response.raise_for_status()
             data = response.json()
             return str(data["confirmation"]["confirmation_url"])
+
+    async def create_refund_object(self, payment_id: str, amount: float, currency: str) -> str:
+        async with httpx.AsyncClient() as session:
+            headers = self.get_headers()
+            refund_data = {"amount": {"value": str(amount), "currency": currency.upper()}, "payment_id": payment_id}
+            response = await session.post("https://api.yookassa.ru/v3/refunds", headers=headers, json=refund_data)
+            return cast(str, response.json()["id"])
 
     async def process_payment_result(
         self, message_service: KafkaMessageSender, event_notification: YoukassaEventNotification
