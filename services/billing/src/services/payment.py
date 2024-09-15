@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from base64 import b64encode
-from datetime import datetime
 from functools import lru_cache
 from logging import getLogger
 from urllib.parse import urljoin
@@ -9,9 +8,10 @@ from uuid import uuid4
 
 import httpx
 
+from broker import KafkaMessageSender
 from core.settings import settings
+from schemas.broker import MessageIn
 from schemas.message import PaymentResult
-from services.message import MessageService
 
 logger = getLogger(__name__)
 
@@ -45,11 +45,12 @@ class PaymentService:
             data = response.json()
             return str(data["confirmation"]["confirmation_url"])
 
-    async def process_payment_callback(self, message_service: MessageService, transaction_id: str) -> None:
+    async def process_payment_callback(self, message_service: KafkaMessageSender, transaction_id: str) -> None:
         try:
             await message_service.send_message(
-                topic_name=settings.kafka.topic_name,
-                message_model=PaymentResult(message=transaction_id, created_at=datetime.now()),
+                message=MessageIn(
+                    topic=settings.kafka.topic_name, key="idempotency_key", value=PaymentResult(message=transaction_id)
+                )
             )
         except Exception as e:  # TODO:
             logger.exception(msg=str(e))

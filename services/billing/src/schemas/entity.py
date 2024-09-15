@@ -55,7 +55,7 @@ class ProductSchema(UUIDMixinSchema, DatesMixinSchema):
 
 
 class OrderSchema(UUIDMixinSchema, DatesMixinSchema):
-    user_id: UUID
+    user_id: UUID | None = Field(default=None, description="Retrieved from access token")
     status: OrderStatusSchema
     currency: CurrencySchema
     products_id: list[UUID]

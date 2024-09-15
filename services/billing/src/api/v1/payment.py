@@ -4,19 +4,18 @@ from typing import Annotated
 
 from uuid import uuid4
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from broker import KafkaMessageSender, get_kafka_sender
 from core.settings import settings
 from db.postgres import get_pg_session
-from schemas.cookie import AccessTokenCookie
+from repositories import RedisService, get_redis_service
+from schemas.broker import MessageIn
 from schemas.entity import TransactionSchema, TransactionStatusSchema, TransactionTypeSchema
 from schemas.youkassa import YoukassaEventNotification
-from services.authentication import AuthService, get_auth_service
 from services.entity import EntityService, get_entity_service
-from services.message import MessageService, get_message_service
 from services.payment import PaymentService, get_payment_service
-from services.redis import RedisService, get_redis_service
 
 router = APIRouter()
 
@@ -25,18 +24,14 @@ router = APIRouter()
 async def create_payment_link(
     order_id: str,
     request: Request,
-    auth_service: Annotated[AuthService, Depends(get_auth_service)],
     entity_service: Annotated[EntityService, Depends(get_entity_service)],
     payment: Annotated[PaymentService, Depends(get_payment_service)],
     redis: Annotated[RedisService, Depends(get_redis_service)],
     db: Annotated[AsyncSession, Depends(get_pg_session)],
-    input_token: str = Cookie(alias=AccessTokenCookie.name),
 ) -> tuple[str, str]:
-    user_external = await auth_service.authenticate_user(input_token)
-    # TODO: проверка ID юзера
     order = await entity_service.get_order(db, order_id)
     if order is None:
-        raise HTTPException(status_code=500, detail=f"Order with id={order_id} not found")
+        raise HTTPException(status_code=404, detail=f"Order with id={order_id} not found")
 
     try:
         ts = TransactionSchema(
@@ -75,7 +70,7 @@ async def create_payment_link(
 async def payment_callback(
     transaction_id: str,
     payment: Annotated[PaymentService, Depends(get_payment_service)],
-    message: Annotated[MessageService, Depends(get_message_service)],
+    message: Annotated[KafkaMessageSender, Depends(get_kafka_sender)],
 ) -> None:
     await payment.process_payment_callback(message, transaction_id)
 
@@ -83,6 +78,8 @@ async def payment_callback(
 @router.post("/results_callback")
 async def results_callback(
     event_notification: YoukassaEventNotification,
-    message_service: Annotated[MessageService, Depends(get_message_service)],
+    message_service: Annotated[KafkaMessageSender, Depends(get_kafka_sender)],
 ) -> None:
-    await message_service.send_message(topic_name=settings.kafka.topic_name, message_model=event_notification)
+    await message_service.send_message(
+        message=MessageIn(topic=settings.kafka.topic_name, key="idempotency_key", value=event_notification)
+    )
