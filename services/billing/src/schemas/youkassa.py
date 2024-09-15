@@ -25,16 +25,21 @@ class YoukassaRefundStatuses(StrEnum):
     CANCELED = auto()
 
 
+class PaymentObjectMetadata(BaseModel):
+    transaction_id: str
+
+
 class YoukassaPaymentObject(BaseModel):
     id: str
     status: YoukassaPaymentStatuses
-    description: str | None
-    payment_method: dict[str, Any] | None
-    captured_at: str | None
-    created_at: str
-    expires_at: str
+    description: str | None = None
+    payment_method: dict[str, Any] | None = None
+    captured_at: str | None = None
+    created_at: str | None = None
+    expires_at: str | None = None
     paid: bool
-    cancellation_details: dict[str, Any] | None
+    cancellation_details: dict[str, Any] | None = None
+    metadata: PaymentObjectMetadata | None = None
 
 
 class YoukassaEventNotification(BaseModel):

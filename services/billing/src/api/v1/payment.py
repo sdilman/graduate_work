@@ -8,10 +8,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from broker import KafkaMessageSender, get_kafka_sender
-from core.settings import settings
 from db.postgres import get_pg_session
 from repositories import RedisService, get_redis_service
-from schemas.broker import MessageIn
 from schemas.entity import TransactionSchema, TransactionStatusSchema, TransactionTypeSchema
 from schemas.youkassa import YoukassaEventNotification
 from services.entity import EntityService, get_entity_service
@@ -68,20 +66,10 @@ async def create_payment_link(
         return link, transaction_id
 
 
-@router.get("/payment_create_callback/{transaction_id}")
-async def payment_callback(
-    transaction_id: str,
-    payment: Annotated[PaymentService, Depends(get_payment_service)],
-    message: Annotated[KafkaMessageSender, Depends(get_kafka_sender)],
-) -> None:
-    await payment.process_payment_callback(message, transaction_id)
-
-
 @router.post("/results_callback")
 async def results_callback(
     event_notification: YoukassaEventNotification,
+    payment_service: Annotated[PaymentService, Depends(get_payment_service)],
     message_service: Annotated[KafkaMessageSender, Depends(get_kafka_sender)],
 ) -> None:
-    await message_service.send_message(
-        message=MessageIn(topic=settings.kafka.topic_name, key="idempotency_key", value=event_notification)
-    )
+    await payment_service.process_payment_result(message_service, event_notification)

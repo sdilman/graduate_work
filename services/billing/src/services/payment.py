@@ -11,7 +11,7 @@ import httpx
 from broker import KafkaMessageSender
 from core.settings import settings
 from schemas.broker import MessageIn
-from schemas.message import PaymentResult
+from schemas.youkassa import YoukassaEventNotification
 
 logger = getLogger(__name__)
 
@@ -45,12 +45,12 @@ class PaymentService:
             data = response.json()
             return str(data["confirmation"]["confirmation_url"])
 
-    async def process_payment_callback(self, message_service: KafkaMessageSender, transaction_id: str) -> None:
+    async def process_payment_result(
+        self, message_service: KafkaMessageSender, event_notification: YoukassaEventNotification
+    ) -> None:
         try:
             await message_service.send_message(
-                message=MessageIn(
-                    topic=settings.kafka.topic_name, key="idempotency_key", value=PaymentResult(message=transaction_id)
-                )
+                message=MessageIn(topic=settings.kafka.topic_name, key="idempotency_key", value=event_notification)
             )
         except Exception as e:  # TODO:
             logger.exception(msg=str(e))
