@@ -109,6 +109,7 @@ class RedisSettings(DefaultSettings):
     backoff_max_time: int = Field(...)
     backoff_max_tries: int = Field(...)
     record_expiration_time: int = Field(...)
+    prefix: str = "idempotency_key:"
 
     model_config = SettingsConfigDict(env_prefix="REDIS_")
 
