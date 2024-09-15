@@ -18,6 +18,12 @@ services:
     expose:
     - ${APP_PORT}
 
+  billing_app_results_worker:
+    <<: *default
+    build:
+      context: .
+    entrypoint: [./workers_entrypoint.sh, results_processor_worker.py]
+
   billing_app_redis:
     <<: *default
     image: redis:7.2.4
