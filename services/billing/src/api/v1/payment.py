@@ -15,6 +15,7 @@ from schemas.broker import MessageIn
 from schemas.entity import TransactionSchema, TransactionStatusSchema, TransactionTypeSchema
 from schemas.youkassa import YoukassaEventNotification
 from services.entity import EntityService, get_entity_service
+from services.order_service import OrderService, get_order_service
 from services.payment import PaymentService, get_payment_service
 
 router = APIRouter()
@@ -25,11 +26,12 @@ async def create_payment_link(
     order_id: str,
     request: Request,
     entity_service: Annotated[EntityService, Depends(get_entity_service)],
+    order_service: Annotated[OrderService, Depends(get_order_service)],
     payment: Annotated[PaymentService, Depends(get_payment_service)],
     redis: Annotated[RedisService, Depends(get_redis_service)],
     db: Annotated[AsyncSession, Depends(get_pg_session)],
 ) -> tuple[str, str]:
-    order = await entity_service.get_order(db, order_id)
+    order = await order_service.get_order(order_id)
     if order is None:
         raise HTTPException(status_code=404, detail=f"Order with id={order_id} not found")
 

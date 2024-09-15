@@ -56,10 +56,10 @@ class ProductSchema(UUIDMixinSchema, DatesMixinSchema):
 
 class OrderSchema(UUIDMixinSchema, DatesMixinSchema):
     user_id: UUID | None = Field(default=None, description="Retrieved from access token")
-    status: OrderStatusSchema
-    currency: CurrencySchema
-    products_id: list[UUID]
-    total_amount: float
+    status: OrderStatusSchema = OrderStatusSchema.PENDING
+    currency: CurrencySchema = CurrencySchema.RUB
+    products_id: list[str]
+    total_amount: float | None = None
 
 
 class UserProductSchema(UUIDMixinSchema, DatesMixinSchema):
