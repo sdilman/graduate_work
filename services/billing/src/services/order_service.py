@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-from typing import Annotated, cast
+from typing import cast
 
 from functools import lru_cache
 
-from fastapi import Depends
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.logger import get_logger
-from db.postgres import get_pg_session
 from models.pg import Order, OrderProduct, Product
 from schemas.entity import OrderSchema
 
@@ -79,5 +77,5 @@ class OrderService:
 
 
 @lru_cache
-def get_order_service(db: Annotated[AsyncSession, Depends(get_pg_session)]) -> OrderService:
+def get_order_service(db: AsyncSession) -> OrderService:
     return OrderService(db)
