@@ -5,12 +5,13 @@ from functools import lru_cache
 from fastapi import Depends
 
 from db import get_redis
-from repositories.redis import RedisService, TRedis
+from interfaces.repositories import RedisRepositoryProtocol
+from repositories.redis import RedisRepository, TRedis
 
-__all__: list[str] = ["RedisService", "get_redis_service"]
+__all__: list[str] = ["RedisRepositoryProtocol", "get_redis_repo"]
 
 
 @lru_cache
-def get_redis_service(redis: Annotated[TRedis, Depends(get_redis)]) -> RedisService:
+def get_redis_repo(redis: Annotated[TRedis, Depends(get_redis)]) -> RedisRepositoryProtocol:
     """Provider of RedisService."""
-    return RedisService(redis)
+    return RedisRepository(redis)

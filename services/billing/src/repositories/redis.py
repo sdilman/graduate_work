@@ -8,9 +8,11 @@ from redis.asyncio import Redis
 from redis.exceptions import ConnectionError, ResponseError, TimeoutError
 
 from core.settings import settings
+from interfaces.repositories import RedisRepositoryProtocol
+from schemas.cache import CacheFlushDto, CacheReadDto, CacheSetDto, CacheUpdateDto
 
 TDecorator: TypeAlias = Callable[[Callable[..., Awaitable[Any]]], Callable[..., Awaitable[Any]]]
-TRedis: TypeAlias = "Redis[bytes]"
+TRedis: TypeAlias = "Redis[str]"
 
 
 def redis_backoff_decorator() -> TDecorator:
@@ -25,36 +27,27 @@ def redis_backoff_decorator() -> TDecorator:
     )
 
 
-class RedisService:
+class RedisRepository(RedisRepositoryProtocol):
+    """Implementation of RedisRepositoryProtocol."""
+
+    __slots__ = ("redis",)
+
     def __init__(self, redis: TRedis):
         self.redis = redis
 
-    @staticmethod
-    async def get_cache_key(order_id: str) -> str:
-        return order_id
+    @redis_backoff_decorator()
+    async def create(self, dto: CacheSetDto) -> None:
+        await self.redis.setex(**dto.model_dump())
 
     @redis_backoff_decorator()
-    async def save_payment_link(
-        self, order_id: str, payment_link: str, expire_time_sec: int = settings.redis.record_expiration_time
-    ) -> None:
-        key = await self.get_cache_key(order_id)
-        await self.redis.setex(name=key, value=payment_link, time=expire_time_sec)
+    async def read(self, dto: CacheReadDto) -> str | None:
+        value: str | None = await self.redis.get(**dto.model_dump())
+        return value
 
     @redis_backoff_decorator()
-    async def del_payment_link(self, order_id: str) -> None:
-        key = await self.get_cache_key(order_id)
-        await self.redis.expire(name=key, time=0)
+    async def update(self, dto: CacheUpdateDto) -> None:
+        await self.redis.expire(**dto.model_dump())
 
     @redis_backoff_decorator()
-    async def refresh_payment_link(
-        self, key: str, expire_time_sec: int = settings.redis.record_expiration_time
-    ) -> None:
-        key = await self.get_cache_key(key)
-        await self.redis.expire(name=key, time=expire_time_sec)
-
-    @redis_backoff_decorator()
-    async def get_value_by_key(self, key: str) -> str | None:
-        value = await self.redis.get(name=key)
-        if value:
-            return str(value)
-        return None
+    async def delete(self, dto: CacheFlushDto) -> None:
+        await self.update(dto)
