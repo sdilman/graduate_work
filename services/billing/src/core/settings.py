@@ -5,6 +5,7 @@ import time
 
 from pathlib import Path
 
+from async_fastapi_jwt_auth import AuthJWT
 from dotenv import find_dotenv, load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -138,3 +139,8 @@ settings = Settings()
 def get_settings() -> Settings:
     """Provide settings."""
     return settings
+
+
+@AuthJWT.load_config
+def get_config() -> JWTSettings:
+    return JWTSettings()
