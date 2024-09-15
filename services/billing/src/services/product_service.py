@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from functools import lru_cache
-
 from sqlalchemy import and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import select, update
@@ -10,10 +8,6 @@ from core.logger import get_logger
 from models.pg import UserProduct
 
 logger = get_logger(__name__)
-
-
-class ProductServiceError(Exception):
-    pass
 
 
 class ProductService:
@@ -33,8 +27,3 @@ class ProductService:
         statement_res.scalar_one()
         await self._db.execute(q_user_product_update)
         await self._db.commit()
-
-
-@lru_cache
-def get_product_service(db: AsyncSession) -> ProductService:
-    return ProductService(db)
