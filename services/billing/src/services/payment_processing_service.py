@@ -24,7 +24,6 @@ class PaymentResultsProcessingService:
         transaction = result.scalar_one_or_none()
         if transaction:
             # TODO: add mapping from payment obj status to order and transaction status
-            transaction.external_id = payment_object.id
             transaction.status = payment_object.status.value
             self._session.add(transaction)
         return transaction
