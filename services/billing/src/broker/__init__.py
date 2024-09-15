@@ -18,9 +18,9 @@ __all__ = [
 
 
 @lru_cache
-def get_kafka_producer(kafka_settings: Annotated[KafkaSettings, Depends(get_settings)]) -> KafkaTransactionManager:
+def get_kafka_producer(settings: Annotated[KafkaSettings, Depends(get_settings)]) -> KafkaTransactionManager:
     """Provide Kafka transactional producer."""
-    return KafkaTransactionManager(kafka_settings)
+    return KafkaTransactionManager(settings.kafka)
 
 
 @lru_cache
