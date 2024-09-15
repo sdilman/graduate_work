@@ -5,7 +5,7 @@ from uuid import uuid4
 from sqlalchemy import UUID, Boolean, Column, DateTime, Enum, Float, ForeignKey, String
 from sqlalchemy.orm import DeclarativeBase, relationship
 
-from models.enums import Currency, OrderStatus, TransactionStatus, TransactionType
+from core.constraints import Currency, OrderStatus, TransactionStatus, TransactionType
 
 
 class Base(DeclarativeBase): ...
