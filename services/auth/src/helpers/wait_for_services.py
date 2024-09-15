@@ -14,14 +14,29 @@ from core.settings import settings as config
 
 logger = get_logger("services_waiter")
 
+NOT_IMPLEMENTED = "This method should be implemented by subclasses."
+
 
 class InterfaceCheckConnection:
     __slots__ = ("exception",)
 
     exceptions: tuple[type[Exception], ...]
 
+    @property
+    async def client(self) -> Any:
+        raise NotImplementedError(NOT_IMPLEMENTED)
+
+    async def close(self) -> None:
+        raise NotImplementedError(NOT_IMPLEMENTED)
+
+    async def perform_check(self) -> bool:
+        raise NotImplementedError(NOT_IMPLEMENTED)
+
     async def check_connection(self) -> bool:
-        raise NotImplementedError("This method should be implemented by subclasses.")
+        try:
+            return await self.perform_check()
+        finally:
+            await self.close()
 
     async def execute_check(self) -> None:
         if not await self.check_connection():
@@ -31,19 +46,35 @@ class InterfaceCheckConnection:
 class PostgresConnectionChecker(InterfaceCheckConnection):
     exceptions = (asyncpg.exceptions.PostgresError, OSError)
 
-    async def check_connection(self) -> bool:
-        client = await asyncpg.connect(dsn=config.pg.dsn_pg)
-        result = await client.fetchval("SELECT 1")
-        await client.close()
+    @property
+    async def client(self) -> Any:
+        if not hasattr(self, "_client"):
+            self._client = await asyncpg.connect(dsn=config.pg.dsn_pg)
+        return self._client
+
+    async def close(self) -> None:
+        await (await self.client).close()
+
+    async def perform_check(self) -> bool:
+        result = await (await self.client).fetchval("SELECT 1")
         return bool(result)
 
 
 class RedisConnectionChecker(InterfaceCheckConnection):
     exceptions = (redis.exceptions.RedisError,)
 
-    async def check_connection(self) -> bool:
-        client = redis.asyncio.from_url(config.redis.dsn)
-        return await client.ping()
+    @property
+    async def client(self) -> Any:
+        if not hasattr(self, "_client"):
+            self._client = await redis.asyncio.from_url(config.redis.dsn)
+        return self._client
+
+    async def close(self) -> None:
+        await (await self.client).aclose()
+
+    async def perform_check(self) -> bool:
+        result = await (await self.client).ping()
+        return bool(result)
 
 
 class ServiceWaiter:
