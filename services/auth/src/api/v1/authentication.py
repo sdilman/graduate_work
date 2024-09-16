@@ -101,7 +101,7 @@ async def check_refresh_token(
     return result
 
 
-@router.post("/user", status_code=status.HTTP_200_OK)
+@router.post("/user", status_code=status.HTTP_200_OK, summary="Get user ID", description="Get user ID")
 async def get_user_id(
     payload: dict[str, str],
     jwt_service: JWTService = Depends(get_jwt_service),
@@ -114,7 +114,12 @@ async def get_user_id(
     return {"sso_id": user.id}
 
 
-@router.post("/login", status_code=status.HTTP_200_OK)
+@router.post(
+    "/login",
+    status_code=status.HTTP_200_OK,
+    summary="Login by username and password",
+    description="Login by username and password",
+)
 async def login_user_for_access_token_cookie(
     request: Request,
     response: Response,
@@ -165,7 +170,12 @@ async def login_user_for_access_token_cookie(
     response.headers["Authorization"] = f"Bearer {access_token}"
 
 
-@router.get("/authentication_callback_yandex", status_code=status.HTTP_200_OK)
+@router.get(
+    "/authentication_callback_yandex",
+    status_code=status.HTTP_200_OK,
+    summary="Callback handle for Yandex authentication",
+    description="Callback handle for Yandex authentication",
+)
 async def authentication_callback_yandex(
     request: Request,
     response: Response,
@@ -239,7 +249,12 @@ async def authentication_callback_yandex(
     return user_id
 
 
-@router.get("/login_external", status_code=status.HTTP_200_OK)
+@router.get(
+    "/login_external",
+    status_code=status.HTTP_200_OK,
+    summary="Login with external authentication",
+    description="Login with external authentication",
+)
 async def get_external_login_link(
     request: Request,
     response: Response,
@@ -266,7 +281,7 @@ async def get_external_login_link(
         return (auth_response.request.method, str(auth_response.request.url))
 
 
-@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT, summary="Logout", description="Logout")
 async def logout_user(
     response: Response,
     access_token: dict = Depends(check_access_token),
@@ -286,7 +301,9 @@ async def logout_user(
     response.delete_cookie(key=RefreshTokenCookie.name)
 
 
-@router.post("/token-refresh", status_code=status.HTTP_200_OK)
+@router.post(
+    "/token-refresh", status_code=status.HTTP_200_OK, summary="Refresh token pair", description="Refresh token pair"
+)
 async def refresh_user_tokens_cookie_pair(
     response: Response,
     token_input_dict: dict = Depends(check_refresh_token),
