@@ -1,0 +1,149 @@
+@startuml
+box External
+actor "Frontend" as frontend
+participant "Auth API" as auth
+participant "Payment Gateway" as payment
+participant "Notification Service" as notification
+participant "Logging Service" as logging
+box end
+
+box Billing Service
+participant "Billing API" as billing
+database "Database" as db
+database "Redis Cache" as cache
+queue "Kafka" as kafka
+participant "Initial Processing Worker" as initial_worker
+participant "Payment Completion Worker" as completion_worker
+participant "Subscription Renewal Worker" as renewal_worker
+box end
+
+group /create_order
+frontend -> billing: Create order (with idempotency key)
+billing -> cache: Check idempotency key
+billing -> auth: Validate token
+alt Key exists
+    cache --> billing: Key exists
+    billing -> logging: ERROR "Idempotency key exists"
+    billing -> notification: Send error message to user
+    billing --> frontend: HTTP 409 Conflict
+else Key not found
+    cache --> billing: Key not found
+    billing -> kafka: Send task to initial processing queue
+    billing -> cache: Store idempotency key
+    billing -> logging: INFO "Order creation task sent to queue"
+    billing --> frontend: Order is being processed
+end
+end
+
+group Initial Processing Worker processing
+initial_worker -> billing: POST /process_order (with order details)
+billing -> db: Check products in order
+alt Products not found
+    billing -> logging: ERROR "Products not found"
+    billing -> notification: Send error message to user
+    billing --> initial_worker: Products not found (404)
+else Products exist
+    billing -> db: Create order and order-product entries
+    billing -> cache: Store order number and idempotency key
+    billing -> cache: Check payment link by order number
+    alt Payment link exists
+        cache --> billing: Link exists
+        billing -> logging: INFO "Payment link found in cache"
+        billing --> initial_worker: Payment link found
+    else
+        cache --> billing: Link not found
+        billing -> payment: Request payment link
+        alt Payment provider error
+            payment --> billing: Error response
+            billing -> logging: ERROR "Payment provider error"
+            billing -> notification: Send error message to user
+            billing --> initial_worker: Error obtaining payment link
+        else
+            payment --> billing: Return payment link
+            billing -> db: Record transaction
+            billing -> cache: Store payment link
+            billing -> logging: INFO "Payment link obtained"
+            billing --> initial_worker: Payment link obtained
+        end
+    end
+    initial_worker -> kafka: Send message to payment completion queue
+end
+end
+
+group Payment Provider Callback
+payment -> billing: Send payment result callback
+billing -> kafka: Send message to payment completion queue
+billing -> logging: INFO "Received payment callback"
+end
+
+group Payment Completion Worker processing
+completion_worker -> billing: POST /complete_payment
+billing -> db: Update transaction data
+billing -> db: Update order-product entries
+billing -> db: Save payment method
+billing -> logging: INFO "Payment processed"
+billing -> notification: Send payment success/failure notification
+completion_worker <-- billing: Payment completion processed
+end
+
+group /cancel_subscription_renewal/{subscription_id}
+frontend -> billing: Request cancellation
+billing -> auth: Validate token
+alt Token invalid
+    auth --> billing: HTTP 403 Forbidden
+    billing -> logging: ERROR "Invalid token"
+    billing -> notification: Send error message to user
+    billing --> frontend: HTTP 403 Forbidden
+else Token valid
+    auth --> billing: OK
+    billing -> db: Change subscription renewal status
+    billing -> logging: INFO "Subscription renewal cancelled"
+    billing -> notification: Send confirmation to user
+    billing --> frontend: OK
+end
+end
+
+group /create_refund/{order_id} (admins only)
+frontend -> billing: Request refund
+billing -> auth: Validate token and admin privileges
+alt Not authorized
+    auth --> billing: HTTP 403 Forbidden
+    billing -> logging: ERROR "Unauthorized refund request"
+    billing -> notification: Send error message to admin
+    billing --> frontend: HTTP 403 Forbidden
+else Authorized
+    auth --> billing: OK
+    billing -> db: Create refund transaction with pending status
+    billing -> payment: Request to create refund
+    alt Refund request failed
+        payment --> billing: Error response
+        billing -> logging: ERROR "Refund request failed"
+        billing -> notification: Send error message to admin
+        billing --> frontend: Error processing refund
+    else
+        payment --> billing: OK
+        billing -> logging: INFO "Refund requested"
+        billing -> notification: Send confirmation to admin
+        billing --> frontend: OK
+    end
+end
+end
+
+group Subscription Renewal Worker
+renewal_worker -> billing: POST /renew_subscriptions
+billing -> db: Find users with subscriptions to renew
+billing -> db: Create orders if not already exists
+billing -> payment: Try to pay using payment token
+alt Payment successful
+    billing -> db: Update transaction and order status
+    billing -> notification: Send renewal success notification
+    billing -> logging: INFO "Subscription renewed"
+else Payment failed
+    billing -> logging: ERROR "Subscription renewal failed"
+    billing -> notification: Send failure notification
+    loop Retry while retry_count < max_retry_count
+        billing -> payment: Retry payment
+    end
+end
+end
+@enduml
