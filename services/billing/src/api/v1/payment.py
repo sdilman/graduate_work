@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, cast
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Request
 from starlette import status
 
 from broker import KafkaMessageSender, get_kafka_sender
@@ -19,16 +19,9 @@ router = APIRouter()
     description="Creates a payment link for the specified order.",
 )
 async def create_payment_link(
-    order_id: str, request: Request, order_service: Annotated[OrderService, Depends(get_order_service)]
+    request: Request, order_id: str, order_service: Annotated[OrderService, Depends(get_order_service)]
 ) -> str:
-    order = await order_service.get_order(order_id)
-    if order is None:
-        raise HTTPException(status_code=404, detail=f"Order with id={order_id} not found")
-
-    try:
-        link = await order_service.get_payment_link_for_order(order.id, str(request.base_url))
-    except Exception as e:
-        raise HTTPException(status_code=500) from e
+    link = await order_service.get_payment_link_for_order(order_id, str(request.base_url))
     return cast(str, link)
 
 
