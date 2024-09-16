@@ -29,7 +29,7 @@ class OrderService:
 
     async def _check_idempotency_key(self, order_schema: OrderSchema) -> None:
         key = f"{cfg.redis.prefix}{order_schema.idempotency_key}"
-        result = self._repo.read(CacheReadDto(key=key))
+        result = await self._repo.read(CacheReadDto(name=key))
         if result:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT, detail="Duplicate request: idempotency key already used."
@@ -39,7 +39,7 @@ class OrderService:
         pairs = itertools.combinations(args, 2)
         for name, value in pairs:
             name_ = f"{cfg.redis.prefix}{name}"
-            await self._repo.create(CacheSetDto(key=name_, value=value))
+            await self._repo.create(CacheSetDto(name=name_, value=value))
 
     async def _get_nonexists_products(self, order_schema: OrderSchema) -> set[str]:
         products_stmt = select(Product).where(Product.id.in_(order_schema.products_id))
@@ -101,7 +101,7 @@ class OrderService:
 
     # TODO: add transaction rollback
     async def get_payment_link_for_order(self, order_id: str, base_url: str) -> str:
-        cached_link = await self._repo.read(CacheReadDto(key=order_id))
+        cached_link = await self._repo.read(CacheReadDto(name=order_id))
 
         if cached_link:
             return cast(str, cached_link)
@@ -131,7 +131,7 @@ class OrderService:
         await self._db.commit()
 
         key = f"{cfg.redis.prefix}{order_id}"
-        idempotency_key = self._repo.read(CacheReadDto(key=key))
+        idempotency_key = self._repo.read(CacheReadDto(name=key))
 
         link, external_id = await self._payment_service.create_payment_link(
             base_url=base_url,
@@ -141,7 +141,7 @@ class OrderService:
             transaction_id=transaction.id,
             idempotency_key=idempotency_key,
         )
-        await self._repo.create(CacheSetDto(key=order_id, value=link))
+        await self._repo.create(CacheSetDto(name=order_id, value=link))
 
         transaction.external_id = external_id
         self._db.add(transaction)
