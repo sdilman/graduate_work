@@ -1,19 +1,19 @@
 from enum import StrEnum, auto
 
 
-class YoukassaObjectTypes(StrEnum):
+class YookassaObjectTypes(StrEnum):
     PAYMENT = auto()
     REFUND = auto()
 
 
-class YoukassaPaymentStatuses(StrEnum):
+class YookassaPaymentStatuses(StrEnum):
     PENDING = auto()
     WAITING_FOR_CAPTURE = auto()
     SUCCEEDED = auto()
     CANCELED = auto()
 
 
-class YoukassaRefundStatuses(StrEnum):
+class YookassaRefundStatuses(StrEnum):
     PENDING = auto()
     SUCCEEDED = auto()
     CANCELED = auto()

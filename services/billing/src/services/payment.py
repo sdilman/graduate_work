@@ -13,7 +13,7 @@ import httpx
 from broker import KafkaMessageSender
 from core.settings import settings
 from schemas.broker import MessageIn
-from schemas.youkassa import YoukassaEventNotification
+from schemas.yookassa import YookassaEventNotification
 
 logger = getLogger(__name__)
 
@@ -68,7 +68,7 @@ class PaymentService:
             return cast(str, response.json()["id"])
 
     async def process_payment_result(
-        self, message_service: KafkaMessageSender, event_notification: YoukassaEventNotification
+        self, message_service: KafkaMessageSender, event_notification: YookassaEventNotification
     ) -> None:
         try:
             await message_service.send_message(

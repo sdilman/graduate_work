@@ -6,10 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import select
 
 from core.constraints import OrderStatus
-from core.constraints.yookassa import YoukassaPaymentStatuses
+from core.constraints.yookassa import YookassaPaymentStatuses
 from core.logger import get_logger
 from models.pg import Order, OrderProduct, PaymentMethod, Product, Transaction, UserProduct
-from schemas.youkassa import YoukassaPaymentObject
+from schemas.yookassa import YookassaPaymentObject
 
 logger = get_logger(__name__)
 
@@ -18,7 +18,7 @@ class PaymentResultsProcessingService:
     def __init__(self, session: AsyncSession):
         self._session = session
 
-    async def _update_transaction(self, payment_object: YoukassaPaymentObject) -> Transaction | None:
+    async def _update_transaction(self, payment_object: YookassaPaymentObject) -> Transaction | None:
         stmt = select(Transaction).where(Transaction.id == payment_object.metadata.transaction_id)
         result = await self._session.execute(stmt)
         transaction = result.scalar_one_or_none()
@@ -41,7 +41,7 @@ class PaymentResultsProcessingService:
         payment_method = PaymentMethod(user_id=user_id, payment_token=payment_token, payment_method="", description="")
         self._session.add(payment_method)
 
-    async def _get_products(self, payment_object: YoukassaPaymentObject, user_id: str, order_id: str) -> None:
+    async def _get_products(self, payment_object: YookassaPaymentObject, user_id: str, order_id: str) -> None:
         user_products_stmt = select(UserProduct).where(UserProduct.user_id == user_id)
         result = await self._session.execute(user_products_stmt)
         user_products = result.scalars()
@@ -78,15 +78,15 @@ class PaymentResultsProcessingService:
 
         self._session.add_all(products_to_add + products_to_edit)
 
-    async def process_payment_result(self, payment_object: YoukassaPaymentObject) -> None:
-        if payment_object.status == YoukassaPaymentStatuses.SUCCEEDED:
+    async def process_payment_result(self, payment_object: YookassaPaymentObject) -> None:
+        if payment_object.status == YookassaPaymentStatuses.SUCCEEDED:
             await self.process_success_payment_result(payment_object)
-        elif payment_object.status == YoukassaPaymentStatuses.CANCELED:
+        elif payment_object.status == YookassaPaymentStatuses.CANCELED:
             await self.process_canceled_payment_result(payment_object)
         else:
             logger.info("Can't handle payment object with status '%s'. Skip it", payment_object.status)
 
-    async def process_success_payment_result(self, payment_object: YoukassaPaymentObject) -> None:
+    async def process_success_payment_result(self, payment_object: YookassaPaymentObject) -> None:
         transaction = await self._update_transaction(payment_object)
         order = await self._update_order(transaction)
         user_id = order.user_id  # type: ignore # noqa: PGH003
@@ -96,5 +96,5 @@ class PaymentResultsProcessingService:
 
         await self._get_products(payment_object, user_id, order.id)  # type: ignore # noqa: PGH003
 
-    async def process_canceled_payment_result(self, payment_object: YoukassaPaymentObject) -> None:
+    async def process_canceled_payment_result(self, payment_object: YookassaPaymentObject) -> None:
         await self._update_transaction(payment_object)

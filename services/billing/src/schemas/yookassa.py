@@ -4,16 +4,16 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from core.constraints.yookassa import YoukassaPaymentStatuses
+from core.constraints.yookassa import YookassaPaymentStatuses
 
 
 class PaymentObjectMetadata(BaseModel):
     transaction_id: str | None = None
 
 
-class YoukassaPaymentObject(BaseModel):
+class YookassaPaymentObject(BaseModel):
     id: str
-    status: YoukassaPaymentStatuses
+    status: YookassaPaymentStatuses
     description: str | None = None
     payment_method: dict[str, Any] | None = None
     captured_at: str | None = None
@@ -24,7 +24,7 @@ class YoukassaPaymentObject(BaseModel):
     metadata: PaymentObjectMetadata | None = None
 
 
-class YoukassaEventNotification(BaseModel):
+class YookassaEventNotification(BaseModel):
     type: str
     event: str
     object: dict[str, Any]
