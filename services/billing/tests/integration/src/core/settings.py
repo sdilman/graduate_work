@@ -21,7 +21,7 @@ class AppSettings(DefaultSettings):
 
 
 class AuthSettings(DefaultSettings):
-    base_url: str = "http://auth_app_backend:8001"
+    base_url: str = "http://auth_app_backend:8071"
     health_check_path: str = "/auth/api/v1/check"
     register_user_path: str = "/auth/api/v1/register"
     login_user_path: str = "/auth/api/v1/login"
