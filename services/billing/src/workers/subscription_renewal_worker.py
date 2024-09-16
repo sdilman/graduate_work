@@ -4,7 +4,7 @@ from core.logger import get_logger
 from db import get_redis
 from db.postgres import get_pg_session
 from db.redis import redis_manager
-from repositories import get_redis_service
+from repositories import get_redis_repo
 from services import get_order_service, get_payment_service
 from services.product_auto_renewal_service import ProductRenewalService
 
@@ -16,7 +16,7 @@ async def run() -> None:
         await redis_manager.initialize()
         async for session in get_pg_session():
             order_service = get_order_service(
-                db=session, redis=get_redis_service(get_redis()), payment_service=get_payment_service()
+                db=session, redis_repo=get_redis_repo(get_redis()), payment_service=get_payment_service()
             )
             product_renewal_service = ProductRenewalService(session, order_service)
             while True:
