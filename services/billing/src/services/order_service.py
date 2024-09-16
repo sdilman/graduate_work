@@ -11,6 +11,7 @@ from starlette import status
 
 from core.constraints import TransactionStatus, TransactionType
 from core.logger import get_logger
+from core.settings import settings as cfg
 from interfaces.repositories import RedisRepositoryProtocol
 from models.pg import Order, OrderProduct, Product, Transaction
 from schemas.cache import CacheReadDto, CacheSetDto
@@ -27,16 +28,18 @@ class OrderService:
         self._payment_service = payment_service
 
     async def _check_idempotency_key(self, order_schema: OrderSchema) -> None:
-        result = self._repo.read(CacheReadDto(key=order_schema.idempotency_key))
-        if not result:
+        key = f"{cfg.redis.prefix}{order_schema.idempotency_key}"
+        result = self._repo.read(CacheReadDto(key=key))
+        if result:
             raise HTTPException(
-                detail="Duplicate request: idempotency key already used.", status_code=status.HTTP_409_CONFLICT
+                status_code=status.HTTP_409_CONFLICT, detail="Duplicate request: idempotency key already used."
             )
 
     async def _store_argument_pairs_in_cache(self, *args: str) -> None:
         pairs = itertools.combinations(args, 2)
         for name, value in pairs:
-            await self._repo.create(CacheSetDto(key=name, value=value))
+            name_ = f"{cfg.redis.prefix}{name}"
+            await self._repo.create(CacheSetDto(key=name_, value=value))
 
     async def _get_nonexists_products(self, order_schema: OrderSchema) -> set[str]:
         products_stmt = select(Product).where(Product.id.in_(order_schema.products_id))
@@ -99,10 +102,14 @@ class OrderService:
     # TODO: add transaction rollback
     async def get_payment_link_for_order(self, order_id: str, base_url: str) -> str:
         cached_link = await self._repo.read(CacheReadDto(key=order_id))
+
         if cached_link:
             return cast(str, cached_link)
 
         order = await self.get_order(order_id)
+        if order is None:
+            detail = f"No order found with ID {order_id}"
+            raise HTTPException(status_code=404, detail=detail)
 
         succeeded_transactions_exists = await self._db.execute(
             select(func.count()).where(
@@ -123,12 +130,16 @@ class OrderService:
         self._db.add(transaction)
         await self._db.commit()
 
+        key = f"{cfg.redis.prefix}{order_id}"
+        idempotency_key = self._repo.read(CacheReadDto(key=key))
+
         link, external_id = await self._payment_service.create_payment_link(
             base_url=base_url,
             amount=order.total_amount,
             currency=order.currency.value.upper(),
             description=f"Payment for order № {order_id}",
             transaction_id=transaction.id,
+            idempotency_key=idempotency_key,
         )
         await self._repo.create(CacheSetDto(key=order_id, value=link))
 
