@@ -28,6 +28,8 @@ class OrderService:
         self._payment_service = payment_service
 
     async def _check_idempotency_key(self, order_schema: OrderSchema) -> None:
+        """Checks that idempotency_key is new otherwise raises an exception"""
+
         key = f"{cfg.redis.prefix}{order_schema.idempotency_key}"
         result = await self._repo.read(CacheReadDto(name=key))
         if result:
@@ -36,12 +38,16 @@ class OrderService:
             )
 
     async def _store_argument_pairs_in_cache(self, *args: str) -> None:
+        """Put data in the Redis cache"""
+
         pairs = itertools.combinations(args, 2)
         for name, value in pairs:
             name_ = f"{cfg.redis.prefix}{name}"
             await self._repo.create(CacheSetDto(name=name_, value=value))
 
     async def _get_nonexists_products(self, order_schema: OrderSchema) -> set[str]:
+        """Gets a set of products mentionned in <order_schema> but non-existing in the database"""
+
         products_stmt = select(Product).where(Product.id.in_(order_schema.products_id))
         res = await self._db.execute(products_stmt)
         products = res.scalars()
@@ -49,6 +55,8 @@ class OrderService:
         return set(order_schema.products_id).difference(existing_product_ids)
 
     async def _calculate_total_order_price(self, order_schema: OrderSchema) -> float:
+        """Creates order price by product prices"""
+
         total_amount_stmt = select(func.sum(Product.basic_price)).where(Product.id.in_(order_schema.products_id))
         res = await self._db.execute(total_amount_stmt)
         total_amount = res.scalar_one_or_none()
@@ -57,6 +65,8 @@ class OrderService:
         return cast(float, total_amount)
 
     async def _create_order_products(self, new_order: Order, order_schema: OrderSchema) -> list[OrderProduct]:
+        """Creates link objects for (order, product) pairs"""
+
         order_products = []
         for product_id in order_schema.products_id:
             new_order_product = OrderProduct(
@@ -67,6 +77,8 @@ class OrderService:
 
     # TODO: add transaction
     async def create_order(self, order_schema: OrderSchema) -> Order:
+        """Creates an order by parameters"""
+
         await self._check_idempotency_key(order_schema)
 
         non_existing_products_ids = await self._get_nonexists_products(order_schema)
@@ -101,6 +113,8 @@ class OrderService:
 
     # TODO: add transaction rollback
     async def get_payment_link_for_order(self, order_id: str, base_url: str) -> str:
+        """Calls yookassa for a payment link by order_id"""
+
         cached_link = await self._repo.read(CacheReadDto(name=order_id))
 
         if cached_link:
@@ -151,6 +165,8 @@ class OrderService:
 
     # TODO: add transaction rollback
     async def refund_order(self, order_id: str) -> bool:
+        """Calls yookassa for a refund by order_id"""
+
         order = await self.get_order(order_id)
         if order is None:
             return False
