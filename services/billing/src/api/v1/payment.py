@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Request
 from starlette import status
 
 from broker import KafkaMessageSender, get_kafka_sender
-from schemas.youkassa import YoukassaEventNotification
+from schemas.yookassa import YookassaEventNotification
 from services import OrderService, PaymentService, get_order_service, get_payment_service
 
 router = APIRouter()
@@ -27,7 +27,7 @@ async def create_payment_link(
 
 @router.post("/results_callback")
 async def results_callback(
-    event_notification: YoukassaEventNotification,
+    event_notification: YookassaEventNotification,
     payment_service: Annotated[PaymentService, Depends(get_payment_service)],
     message_service: Annotated[KafkaMessageSender, Depends(get_kafka_sender)],
 ) -> None:
