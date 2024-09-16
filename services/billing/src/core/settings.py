@@ -24,6 +24,8 @@ class AppSettings(DefaultSettings):
     host: str = Field(...)
     port: int = Field(...)
     root_path: str = Field(...)
+    base_url: str = "http://billing_app_backend:8075"
+    health_check_path: str = "/billing/api/v1/check"
 
     model_config = SettingsConfigDict(env_prefix="APP_")
 
