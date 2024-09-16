@@ -5,30 +5,31 @@ from typing import Annotated, Any
 from uuid import UUID  # noqa: TCH003
 
 from fastapi import APIRouter, Depends, Request
-from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
-from db.postgres import get_pg_session
 from schemas.entity import ProductSchema
-from services.entity import EntityService, get_entity_service
+from services import EntityService, get_entity_service
 
 router = APIRouter()
 
 
-@router.post("/create_product")
+@router.post(
+    "/create_product", status_code=status.HTTP_201_CREATED, summary="Create product", description="Create product"
+)
 async def create_product(
-    entity_service: Annotated[EntityService, Depends(get_entity_service)],
-    db: Annotated[AsyncSession, Depends(get_pg_session)],
-    input_product: ProductSchema,
+    service: Annotated[EntityService, Depends(get_entity_service)], input_product: ProductSchema
 ) -> Any:
-    return await entity_service.create_product(db, input_product)
+    return await service.create_product(input_product)
 
 
-@router.post("/create_user_product")
+@router.post(
+    "/create_user_product",
+    status_code=status.HTTP_201_CREATED,
+    summary="Create user product",
+    description="Create user product",
+)
 async def create_user_product(
-    request: Request,
-    entity_service: Annotated[EntityService, Depends(get_entity_service)],
-    db: Annotated[AsyncSession, Depends(get_pg_session)],
-    product_id: UUID,
+    request: Request, service: Annotated[EntityService, Depends(get_entity_service)], product_id: UUID
 ) -> Any:
     user_id = request.state.user_id
-    return await entity_service.create_user_product(db, user_id, product_id)
+    return await service.create_user_product(user_id, product_id)
