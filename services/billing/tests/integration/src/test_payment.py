@@ -11,7 +11,6 @@ from core.settings import settings
 logger = logging.getLogger(__name__)
 
 
-@pytest.mark.skip
 def test_payment() -> None:
     # Register user
     user_url = settings.auth.base_url + settings.auth.register_user_path
@@ -63,7 +62,7 @@ def test_payment() -> None:
             url=payment_url, json=payment_data, cookies={settings.auth.access_name: auth_token_value}
         )
         response.raise_for_status()
-        assert response.status_code == 200
+        assert response.status_code == 201
     except requests.exceptions.RequestException as e:
         logger.error("Request failed: %s", traceback.format_exc())
         raise

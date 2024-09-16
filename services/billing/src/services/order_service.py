@@ -131,7 +131,7 @@ class OrderService:
         await self._db.commit()
 
         key = f"{cfg.redis.prefix}{order_id}"
-        idempotency_key = self._repo.read(CacheReadDto(name=key))
+        idempotency_key = await self._repo.read(CacheReadDto(name=key))
 
         link, external_id = await self._payment_service.create_payment_link(
             base_url=base_url,
