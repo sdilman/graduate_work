@@ -1,4 +1,4 @@
-@startuml
+    @startuml
 
 box External
 actor "Frontend" as frontend
