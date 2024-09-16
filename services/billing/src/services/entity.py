@@ -24,9 +24,7 @@ class EntityService:
         return new_product.id
 
     async def create_transaction(self, transaction_schema: TransactionSchema) -> str:
-        import logging
-
-        logging.warning(transaction_schema.model_dump(exclude_unset=True))
+        logger.info(transaction_schema.model_dump(exclude_unset=True))
         new_transaction = Transaction(**transaction_schema.model_dump(exclude_unset=True))
         self._db.add(new_transaction)
         await self._db.commit()
