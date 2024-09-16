@@ -10,7 +10,7 @@ from core.settings import settings
 
 logger = get_logger(__name__)
 
-TRedis: TypeAlias = "Redis[bytes]"
+TRedis: TypeAlias = "Redis[str]"
 
 
 class RedisManager:
@@ -22,7 +22,7 @@ class RedisManager:
     async def initialize(self) -> None:
         """Initialize redis connection."""
         if self.redis is None:
-            self.redis = Redis(host=settings.redis.host, port=settings.redis.port)
+            self.redis = Redis(host=settings.redis.host, port=settings.redis.port, decode_responses=True)
             logger.info("Redis client has been initialized")
 
     async def close(self) -> None:

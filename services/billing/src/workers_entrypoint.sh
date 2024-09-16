@@ -4,14 +4,10 @@ set -x
 
 echo 'Waiting for services to start...'
 
-python -m helpers.wait_for_services &
+python -m helpers.wait_for_app &
 PG_PID=$!
 
 wait $PG_PID
-
-echo "Upgrading database..."
-
-alembic upgrade head
 
 WORKER_NAME=$1
 echo "Starting $WORKER_NAME worker..."
