@@ -104,6 +104,8 @@ class Settings(DefaultSettings):
     # Rate limit
     register_rate_limit_times: int = Field(default=3, env="REGISTER_RATE_LIMIT_TIMES")
     register_rate_limit_seconds: int = Field(default=60 * 5, env="REGISTER_RATE_LIMIT_SECONDS")
+    # FastAPI limiter
+    fastapi_enable_limiter: bool = Field(default=True, env="FASTAPI_ENABLE_LIMITER")
 
     su: SuperUserSettings = SuperUserSettings()
 
