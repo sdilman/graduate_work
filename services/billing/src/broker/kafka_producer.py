@@ -2,10 +2,12 @@ from typing import AsyncGenerator
 
 from contextlib import asynccontextmanager
 
+import backoff
+
 from aiokafka import AIOKafkaProducer
 
 from core.logger import get_logger
-from core.settings import KafkaSettings
+from core.settings import KafkaSettings, settings
 from schemas.broker import MessageIn
 
 logger = get_logger(__name__)
@@ -47,6 +49,9 @@ class KafkaMessageSender:
     def __init__(self, connection_manager: KafkaTransactionManager) -> None:
         self.connection_manager = connection_manager
 
+    @backoff.on_exception(
+        backoff.expo, Exception, max_time=settings.backoff.max_time, max_tries=settings.backoff.max_tries
+    )
     async def send_message(self, message: MessageIn) -> None:
         """Send message to Kafka topic."""
         async with self.connection_manager.get_producer() as producer:
