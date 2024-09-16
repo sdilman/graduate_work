@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from typing import cast
 
+import uuid
+
 from base64 import b64encode
 from logging import getLogger
 from urllib.parse import urljoin
-from uuid import uuid4
 
 import httpx
 
@@ -18,19 +19,27 @@ logger = getLogger(__name__)
 
 
 class PaymentService:
-    @staticmethod
-    def get_headers() -> dict[str, str]:
-        idempotence_key = str(uuid4())
+    _idempotency_key: str | None = None
+
+    @property
+    def idempotency_key(self) -> str:
+        if self._idempotency_key is None:
+            self._idempotency_key = str(uuid.uuid4().hex)
+        return self._idempotency_key
+
+    def get_headers(self) -> dict[str, str]:
         auth = b64encode(f"{settings.payment.account_id}:{settings.payment.secret_key}".encode()).decode("utf-8")
+
         return {
             "Authorization": f"Basic {auth}",
-            "Idempotence-Key": idempotence_key,
+            "Idempotence-Key": self.idempotency_key,
             "Content-Type": "application/json",
         }
 
     async def create_payment_link(
-        self, base_url: str, amount: float, currency: str, description: str, transaction_id: str
+        self, base_url: str, amount: float, currency: str, description: str, transaction_id: str, idempotency_key: str
     ) -> tuple[str, str]:
+        self._idempotency_key = idempotency_key
         async with httpx.AsyncClient() as session:
             headers = self.get_headers()
             payment_data = {
@@ -64,7 +73,9 @@ class PaymentService:
         try:
             await message_service.send_message(
                 message=MessageIn(
-                    topic=settings.kafka.topic_name, key="idempotency_key", value=event_notification.model_dump_json()
+                    topic=settings.kafka.topic_name,
+                    key=self.idempotency_key,
+                    value=event_notification.model_dump_json(),
                 )
             )
         except Exception as e:  # TODO:
