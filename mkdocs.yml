@@ -1,0 +1,28 @@
+site_name: Billing Documentation
+
+nav:
+- Home: index.md
+- Technical Specifications: system_design/technical_specifications.md
+- System Design:
+  - Access and Roles Management: system_design/roles.md
+  - Data Storage and Security: system_design/data_storage_and_security.md
+  - Error Handling: system_design/error_handling.md
+  - Logging and Monitoring: system_design/logging_and_monitoring.md
+  - Subscription Types: system_design/sub.md
+  - Subscription Auto Renewal: system_design/subscription_auto_renewal.md
+- Diagrams: system_design/diagrams.md
+
+
+theme:
+  name: material
+
+plugins:
+- search
+
+markdown_extensions:
+- codehilite
+- admonition
+- toc:
+    permalink: true
+
+remote_branch: gh-pages
