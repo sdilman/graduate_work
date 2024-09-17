@@ -26,3 +26,4 @@ markdown_extensions:
     permalink: true
 
 remote_branch: gh-pages
+site_url: https://sdilman.github.io/graduate_work/
